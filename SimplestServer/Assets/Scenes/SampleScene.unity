@@ -214,7 +214,6 @@ GameObject:
   - component: {fileID: 238226171}
   - component: {fileID: 238226170}
   - component: {fileID: 238226169}
-  - component: {fileID: 238226172}
   m_Layer: 5
   m_Name: Button
   m_TagString: Untagged
@@ -286,7 +285,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 238226172}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: NetworkedServer, Assembly-CSharp
         m_MethodName: ButtonPress
         m_Mode: 1
@@ -336,20 +335,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 238226167}
   m_CullTransparentMesh: 1
---- !u!114 &238226172
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 238226167}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2a32208fc33a343fa844dd2ff64b9e18, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  inputFieldToClient: {fileID: 561175250}
-  fromClientTextField: {fileID: 364940372}
 --- !u!1 &364940370
 GameObject:
   m_ObjectHideFlags: 0
@@ -495,6 +480,52 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &374668060
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 374668062}
+  - component: {fileID: 374668061}
+  m_Layer: 0
+  m_Name: NetworkedServer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &374668061
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 374668060}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a32208fc33a343fa844dd2ff64b9e18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputFieldToClient: {fileID: 561175250}
+  fromClientTextField: {fileID: 364940372}
+  filePath: 
+--- !u!4 &374668062
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 374668060}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.9284858, y: 0.08114399, z: 484.05756}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &519420028
 GameObject:

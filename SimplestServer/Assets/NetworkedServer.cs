@@ -6,6 +6,28 @@ using UnityEngine.Networking;
 using System.IO;
 using UnityEngine.UI;
 
+
+
+/// <summary>
+/// Create Player Account class
+/// </summary>
+public class PlayerAccount
+{
+    public string username, password;
+    public PlayerAccount(string username, string password)
+    {
+        this.username = username;
+        this.password = password;
+    }
+}
+
+
+
+
+/// <summary>
+/// 1/11/12
+/// Integrating login system and chat system from client
+/// </summary>
 public class NetworkedServer : MonoBehaviour
 {
     int maxConnections = 1000;
@@ -125,7 +147,11 @@ public class NetworkedServer : MonoBehaviour
         }
     }
 
-    // Received message's string and client ID will be stored using this function
+    /// <summary>
+    /// Process received message from client(s)
+    /// </summary>
+    /// <param name="msg">message received</param>
+    /// <param name="id">id</param>
     private void ProcessRecievedMsg(string msg, int id)
     {
         Debug.Log("msg recieved = " + msg + ".  connection id = " + id);
@@ -139,25 +165,26 @@ public class NetworkedServer : MonoBehaviour
         string[] receivedMessageSplit = msg.Split(',');
         int signifer = int.Parse(receivedMessageSplit[0]);
 
-
-        // Check signifier to 
-        if (signifer == ClientToServerSignifiers.CreateAccount)
+        // Perform the function as interpreted by the signifier
+        switch (signifer)
         {
-            CreateAccount(receivedMessageSplit, id);
-        }
-        else if (signifer == ClientToServerSignifiers.Login)
-        {
-            Debug.Log("Logging in");
+            case (ClientToServerSignifiers.CreateAccount):
+                CreateAccount(receivedMessageSplit, id);
+                break;
 
-            Login(receivedMessageSplit, id);
-        
-        }
 
+            case ClientToServerSignifiers.Login:
+                Login(receivedMessageSplit, id);
+                break;
+
+            default:
+                break;
+        }
     }
 
 
     void CreateAccount(string[] receivedMessageSplit, int id)
-    {  
+    {
         bool isUsernameInuse = false;
 
         string username = receivedMessageSplit[1];
@@ -206,8 +233,6 @@ public class NetworkedServer : MonoBehaviour
 
         bool isUsernameExists = false;
 
-        Debug.Log("Login");
-
         // Read from file - load up the list
         Account_ReadFromFile();
         PlayerAccount playerAccount = new PlayerAccount(null,null);
@@ -233,7 +258,7 @@ public class NetworkedServer : MonoBehaviour
         {
             if (password != playerAccount.password)
             {
-                SendMessageToClient(ServerToClientSignifiers.LoginFailed + "", id);
+                SendMessageToClient(ServerToClientSignifiers.LoginFailedPassword + "", id);
                 Debug.Log("Password not right");
             }
             else
@@ -244,7 +269,7 @@ public class NetworkedServer : MonoBehaviour
         }
         else
         {
-            SendMessageToClient(ServerToClientSignifiers.LoginFailed + "", id);
+            SendMessageToClient(ServerToClientSignifiers.LoginFailedUsername + "", id);
             Debug.Log("Username does not exist!");
         }
 
@@ -287,37 +312,21 @@ public class NetworkedServer : MonoBehaviour
     }
 }
 
-
-
-
-/// <summary>
-/// Create Player Account class
-/// </summary>
-public class PlayerAccount
-{
-    public string username, password;
-    public PlayerAccount(string username, string password)
-    {
-        this.username = username;
-        this.password = password;
-    }
-}
-
-
 /// <summary>
 /// LOGIN/CREATE ACCOUNT - CLIENT TO SERVER, SERVER TO CLIENT 
 /// </summary>
 public static class ClientToServerSignifiers
 {
-    public static int CreateAccount = 1;
-    public static int Login = 2;
+    public const int CreateAccount = 1;
+    public const int Login = 2;
 }
 
 
 public static class ServerToClientSignifiers
 {
-    public static int LoginComplete = 1;
-    public static int LoginFailed = 2;
-    public static int AccountCreationComplete = 3;
-    public static int AccountCreationFailed = 4;
+    public const int LoginComplete = 1;
+    public const int LoginFailedPassword = 2;
+    public const int LoginFailedUsername = 3;
+    public const int AccountCreationComplete = 4;
+    public const int AccountCreationFailed = 5;
 }

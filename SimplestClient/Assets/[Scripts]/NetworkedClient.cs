@@ -5,6 +5,10 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
+/// <summary>
+/// 1/11/12
+/// Integrating login system and chat system
+/// </summary>
 public class NetworkedClient : MonoBehaviour
 {
     int connectionID;
@@ -20,10 +24,6 @@ public class NetworkedClient : MonoBehaviour
     byte error;
     bool isConnected = false;
     int ourClientID;
-
-    // My tweak for basic chat send
-    [SerializeField]
-    private InputField inputFieldToServer;      // input field for text entry
 
     [SerializeField]
     private Text fromServerTextField;           // text field for showing sent message
@@ -132,18 +132,7 @@ public class NetworkedClient : MonoBehaviour
         // which will make the peer end the connection
         NetworkTransport.Disconnect(hostID, connectionID, out error);
     }
-
-    // Button Pressed function to send the message to server
-    public void ButtonPress()
-    {
-
-        // Get text from input field and use NetworkTransport.Send to send it
-        SendMessageToHost(inputFieldToServer.text);
-
-        // Remove Text that was written to acknowledge the message was sent (checks remaining to be performed)
-        inputFieldToServer.text = "";
-    }
-
+    
     // Send message to host using the host ID and the text received
     public void SendMessageToHost(string msg)
     {
@@ -163,19 +152,23 @@ public class NetworkedClient : MonoBehaviour
 
         if (int.Parse(msg) == ServerToClientSignifiers.LoginComplete)
         {
-            fromServerTextField.text = "Login Successful";
+            fromServerTextField.text = "Login Successful!!!";
         }
-        else if (int.Parse(msg) == ServerToClientSignifiers.LoginFailed)
+        else if (int.Parse(msg) == ServerToClientSignifiers.LoginFailedPassword)
         {
-            fromServerTextField.text = "Login Failed";
+            fromServerTextField.text = "Incorrect Password!";
+        }
+        else if (int.Parse(msg) == ServerToClientSignifiers.LoginFailedUsername)
+        {
+            fromServerTextField.text = "Username does not exist!";
         }
         else if (int.Parse(msg) == ServerToClientSignifiers.AccountCreationComplete)
         {
-            fromServerTextField.text = "Account successfully created";
+            fromServerTextField.text = "Account successfully created!";
         }
         else if(int.Parse(msg) == ServerToClientSignifiers.AccountCreationFailed)
         {
-            fromServerTextField.text = "Account creation failed";
+            fromServerTextField.text = "Account creation failed :(";
         }
     }
 
@@ -191,15 +184,15 @@ public class NetworkedClient : MonoBehaviour
 /// </summary>
 public static class ClientToServerSignifiers
 {
-    public static int CreateAccount = 1;
-    public static int Login = 2;
+    public const int CreateAccount = 1;
+    public const int Login = 2;
 }
-
 
 public static class ServerToClientSignifiers
 {
-    public static int LoginComplete = 1;
-    public static int LoginFailed = 2;
-    public static int AccountCreationComplete = 3;
-    public static int AccountCreationFailed = 4;
+    public const int LoginComplete = 1;
+    public const int LoginFailedPassword = 2;
+    public const int LoginFailedUsername = 3;
+    public const int AccountCreationComplete = 4;
+    public const int AccountCreationFailed = 5;
 }
