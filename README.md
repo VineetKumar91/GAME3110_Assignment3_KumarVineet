@@ -1,2 +1,2 @@
 # GAME3110_Assignment3_KumarVineet
- Simplest Client and Server for Assignment 3
+ Multiplayer Systems - Simplest Client and Server files in one repo
