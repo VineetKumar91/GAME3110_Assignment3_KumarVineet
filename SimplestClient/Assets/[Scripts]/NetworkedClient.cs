@@ -21,9 +21,9 @@ public class NetworkedClient : MonoBehaviour
     // So go for anything above 5000
     // Also host and client need to connect to the same port
     int socketPort = 5111;
-    byte error;
-    bool isConnected = false;
-    int ourClientID;
+    byte error = 1;
+    private bool isConnected;
+    public int ourClientID;
 
     [SerializeField]
     private Text fromServerTextField;           // text field for showing sent message
@@ -31,7 +31,8 @@ public class NetworkedClient : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Connect();
+        ourClientID = -1;
+        //Connect();
     }
 
     // Update is called once per frame
@@ -59,9 +60,11 @@ public class NetworkedClient : MonoBehaviour
             int bufferSize = 1024;
             int dataSize;
             
+           
+
             // Types of events that NetworkTransport.Receive can give -> connect, data, disconnect, nothing
             NetworkEventType recNetworkEvent = NetworkTransport.Receive(out recHostID, out recConnectionID, out recChannelID, recBuffer, bufferSize, out dataSize, out error);
-
+            
             switch (recNetworkEvent)
             {
                 case NetworkEventType.ConnectEvent:
@@ -78,13 +81,14 @@ public class NetworkedClient : MonoBehaviour
                     break;
                 case NetworkEventType.DisconnectEvent:
                     isConnected = false;
+                    ourClientID = -1;
                     Debug.Log("disconnected.  " + recConnectionID);
                     break;
             }
         }
     }
     
-    private void Connect()
+    public void Connect()
     {
 
         if (!isConnected)
@@ -118,9 +122,8 @@ public class NetworkedClient : MonoBehaviour
             if (error == 0)
             {
                 isConnected = true;
-
+            
                 Debug.Log("Connected, id = " + connectionID);
-
             }
         }
     }
@@ -150,25 +153,14 @@ public class NetworkedClient : MonoBehaviour
         fromServerTextField.text = "Server: " + msg;
         Debug.Log("msg recieved = " + msg + ".  connection id = " + id);
 
-        if (int.Parse(msg) == ServerToClientSignifiers.LoginComplete)
+
+        if (GameManager.currentMode == CurrentMode.Login)
         {
-            fromServerTextField.text = "Login Successful!!!";
+            LoginSystem.GetInstance().HandleResponseFromServer(msg);
         }
-        else if (int.Parse(msg) == ServerToClientSignifiers.LoginFailedPassword)
+        else
         {
-            fromServerTextField.text = "Incorrect Password!";
-        }
-        else if (int.Parse(msg) == ServerToClientSignifiers.LoginFailedUsername)
-        {
-            fromServerTextField.text = "Username does not exist!";
-        }
-        else if (int.Parse(msg) == ServerToClientSignifiers.AccountCreationComplete)
-        {
-            fromServerTextField.text = "Account successfully created!";
-        }
-        else if(int.Parse(msg) == ServerToClientSignifiers.AccountCreationFailed)
-        {
-            fromServerTextField.text = "Account creation failed :(";
+            
         }
     }
 

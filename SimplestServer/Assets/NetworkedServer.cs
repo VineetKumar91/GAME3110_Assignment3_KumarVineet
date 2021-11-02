@@ -200,7 +200,7 @@ public class NetworkedServer : MonoBehaviour
         // if no, creation will succeed and respond
         foreach (PlayerAccount playerAcc in playerAccountsList)
         {
-
+            Debug.Log(playerAcc);
             if (username == playerAcc.username)
             {
                 // account creation failed
@@ -280,20 +280,28 @@ public class NetworkedServer : MonoBehaviour
     void Account_WriteToFile()
     {
         // Streamwriter - write to file
-        StreamWriter streamWriter = new StreamWriter(filePath);
+        StreamWriter streamWriter = new StreamWriter(filePath, false);
 
         foreach (PlayerAccount playerAcc in playerAccountsList)
-        {
+        {            
+            Debug.Log("username = " + playerAcc.username);
             streamWriter.WriteLine(playerAcc.username + ","
                 + playerAcc.password + ",");
         
         }
 
+        // Flush for clearing the streamwriter
+        streamWriter.Flush();
+        
+        // Close the stream writer
         streamWriter.Close();
     }
 
     void Account_ReadFromFile()
     {
+        // Clear the file contents before loading up the list
+        playerAccountsList.Clear();
+
         StreamReader streamReader = new StreamReader(filePath);
         
         string line;
