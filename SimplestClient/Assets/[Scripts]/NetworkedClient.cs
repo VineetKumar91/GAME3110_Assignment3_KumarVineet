@@ -158,7 +158,7 @@ public class NetworkedClient : MonoBehaviour
         {
             LoginSystem.GetInstance().HandleResponseFromServer(msg);
         }
-        else
+        else if(GameManager.currentMode == CurrentMode.Game)
         {
             
         }
@@ -178,6 +178,8 @@ public static class ClientToServerSignifiers
 {
     public const int CreateAccount = 1;
     public const int Login = 2;
+
+    public const int ColorChanged = 100;
 }
 
 public static class ServerToClientSignifiers
@@ -187,4 +189,8 @@ public static class ServerToClientSignifiers
     public const int LoginFailedUsername = 3;
     public const int AccountCreationComplete = 4;
     public const int AccountCreationFailed = 5;
+
+
+
+    public const int ColorChanged = 100;
 }

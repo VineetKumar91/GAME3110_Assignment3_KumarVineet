@@ -2,9 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameRoomSystem : MonoBehaviour
+public class LobbySystem : MonoBehaviour
 {
-
+    // Start is called before the first frame update
     void Start()
     {
         

@@ -199,6 +199,8 @@ public class LoginSystem : MonoBehaviour
     {
         yield return new WaitForSeconds(2f);
         GameManager.GetInstance().ChangeMode(CurrentMode.GameRoom);
+
+        // Stopping Coroutines here
         StopAllCoroutines();
     }
 }

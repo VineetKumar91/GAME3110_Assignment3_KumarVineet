@@ -177,9 +177,20 @@ public class NetworkedServer : MonoBehaviour
                 Login(receivedMessageSplit, id);
                 break;
 
+
+            case ClientToServerSignifiers.ColorChanged:
+                ColorChange(receivedMessageSplit, id);
+                break;
+
+
             default:
                 break;
         }
+    }
+
+    private void ColorChange(string[] receivedMessageSplit, int id)
+    {
+        
     }
 
 
@@ -327,6 +338,8 @@ public static class ClientToServerSignifiers
 {
     public const int CreateAccount = 1;
     public const int Login = 2;
+
+    public const int ColorChanged = 100;
 }
 
 
@@ -337,4 +350,7 @@ public static class ServerToClientSignifiers
     public const int LoginFailedUsername = 3;
     public const int AccountCreationComplete = 4;
     public const int AccountCreationFailed = 5;
+
+
+    public const int ColorChanged = 100;
 }
