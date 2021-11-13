@@ -154,11 +154,13 @@ public class NetworkedClient : MonoBehaviour
         Debug.Log("msg recieved = " + msg + ".  connection id = " + id);
 
 
+        // Receive server message and handle appropriately w.r.t. in which room
+        // the player is currently
         if (GameManager.currentMode == CurrentMode.Login)
         {
             LoginSystem.GetInstance().HandleResponseFromServer(msg);
         }
-        else if(GameManager.currentMode == CurrentMode.Game)
+        else if(GameManager.currentMode == CurrentMode.Lobby)
         {
             
         }

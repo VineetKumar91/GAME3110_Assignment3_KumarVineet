@@ -7,9 +7,8 @@ using UnityEngine.UI;
 public enum CurrentMode
 {
    Login,
+   Lobby,
    GameRoom,
-   Game,
-   Chat
 }
 
 
@@ -18,6 +17,8 @@ public class GameManager : MonoBehaviour
     private static GameManager _instance;
 
     public static CurrentMode currentMode;
+
+    public static string currentUsername;
 
     [SerializeField] 
     Canvas LoginCanvas;
@@ -53,17 +54,12 @@ public class GameManager : MonoBehaviour
                 break;
 
 
-            case CurrentMode.GameRoom:
+            case CurrentMode.Lobby:
                 LoginCanvas.gameObject.SetActive(false);
                 GameRoomCanvas.gameObject.SetActive(true);
                 break;
 
-            case CurrentMode.Game:
-
-                break;
-
-
-            case CurrentMode.Chat:
+            case CurrentMode.GameRoom:
 
                 break;
         }

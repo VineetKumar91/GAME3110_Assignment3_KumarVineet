@@ -6,24 +6,6 @@ using UnityEngine.Networking;
 using System.IO;
 using UnityEngine.UI;
 
-
-
-/// <summary>
-/// Create Player Account class
-/// </summary>
-public class PlayerAccount
-{
-    public string username, password;
-    public PlayerAccount(string username, string password)
-    {
-        this.username = username;
-        this.password = password;
-    }
-}
-
-
-
-
 /// <summary>
 /// 1/11/12
 /// Integrating login system and chat system from client
@@ -53,7 +35,17 @@ public class NetworkedServer : MonoBehaviour
     /// </summary>
     public LinkedList<PlayerAccount> playerAccountsList;
 
+    /// <summary>
+    /// 8th Nov
+    /// </summary>
+    public LinkedList<PlayerAccount> onlinePlayerAccounts;
+
     public string filePath;
+
+
+    // Grid layout update of online player accounts
+    public GameObject userPanel;
+    public GameObject userpanelText;
 
     // Start is called before the first frame update
     void Start()
@@ -81,6 +73,8 @@ public class NetworkedServer : MonoBehaviour
 
         // create a filepath
         filePath = Application.dataPath + Path.DirectorySeparatorChar + "AccountDatabase.txt";
+
+        onlinePlayerAccounts = new LinkedList<PlayerAccount>();
     }
 
     // Update is called once per frame
@@ -111,6 +105,7 @@ public class NetworkedServer : MonoBehaviour
                 break;
             case NetworkEventType.DisconnectEvent:
                 Debug.Log("Disconnection, " + recConnectionID);
+                ClientDisconnect(recConnectionID);
                 break;
         }
     }
@@ -176,24 +171,20 @@ public class NetworkedServer : MonoBehaviour
             case ClientToServerSignifiers.Login:
                 Login(receivedMessageSplit, id);
                 break;
-
-
-            case ClientToServerSignifiers.ColorChanged:
-                ColorChange(receivedMessageSplit, id);
-                break;
+                
 
 
             default:
                 break;
         }
     }
+    
 
-    private void ColorChange(string[] receivedMessageSplit, int id)
-    {
-        
-    }
-
-
+    /// <summary>
+    /// Create account
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
+    /// <param name="id"></param>
     void CreateAccount(string[] receivedMessageSplit, int id)
     {
         bool isUsernameInuse = false;
@@ -237,6 +228,11 @@ public class NetworkedServer : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// login system
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
+    /// <param name="id"></param>
     void Login(string[] receivedMessageSplit, int id)
     {
         string username = receivedMessageSplit[1];
@@ -275,6 +271,14 @@ public class NetworkedServer : MonoBehaviour
             else
             {
                 SendMessageToClient(ServerToClientSignifiers.LoginComplete + "", id);
+                
+                // If login is successful, set the ID correctly
+                // ID IS ALLOCATED TO ONLY ONLINE AND LOGGED IN USERS SINCE THAT IS MODE OF REFERENCE
+                playerAccount.clientID = id;
+                onlinePlayerAccounts.AddLast(playerAccount);
+
+                // Notify Client side
+                NotifyClientLobby(playerAccount);
                 Debug.Log("Login Completed");
             }
         }
@@ -287,7 +291,64 @@ public class NetworkedServer : MonoBehaviour
     }
 
 
-    // Functions for writing and reading to file
+    /// <summary>
+    /// Notify Client Lobby and update server user panel
+    /// </summary>
+    void NotifyClientLobby(PlayerAccount playerAccount)
+    {
+        // Do some server side stuff first
+        GameObject userTextForPanel = Instantiate(userpanelText, userPanel.transform);
+        userTextForPanel.GetComponent<Text>().text = playerAccount.clientID + ": " + playerAccount.username;
+    }
+
+
+    /// <summary>
+    /// Handle Client Disconnect to remove from current list
+    /// </summary>
+    /// <param name="clientID"></param>
+    public void ClientDisconnect(int clientID)
+    {
+        Debug.Log("Before Removing");
+        DebugPurposes_DisplayOnlinePlayerAccounts();
+
+        foreach (var playerAccount in onlinePlayerAccounts)
+        {
+            if (playerAccount.clientID == clientID)
+            {
+                foreach (Transform child in userPanel.transform)
+                {
+                    if (child.gameObject.GetComponent<Text>().text ==
+                        playerAccount.clientID + ": " + playerAccount.username)
+                    {
+                        Destroy(child.gameObject);
+                        break;
+                    }
+                }
+
+                onlinePlayerAccounts.Remove(playerAccount);
+                break;
+            }
+        }
+
+        Debug.Log("After Removing");
+        DebugPurposes_DisplayOnlinePlayerAccounts();
+    }
+
+    /// <summary>
+    /// Debug purposes function
+    /// </summary>
+    private void DebugPurposes_DisplayOnlinePlayerAccounts()
+    {
+        foreach (var playerAccount in onlinePlayerAccounts)
+        {
+            Debug.Log(playerAccount.username + "_" + playerAccount.password + "_" + playerAccount.clientID);
+        }
+    }
+
+
+    /// <summary>
+    /// Functions for writing and reading to file 
+    /// </summary>
     void Account_WriteToFile()
     {
         // Streamwriter - write to file
@@ -331,6 +392,25 @@ public class NetworkedServer : MonoBehaviour
     }
 }
 
+
+
+
+
+/// <summary>
+/// Create Player Account class
+/// </summary>
+public class PlayerAccount
+{
+    public string username, password;
+    public int clientID;
+    public PlayerAccount(string username, string password)
+    {
+        this.username = username;
+        this.password = password;
+    }
+}
+
+
 /// <summary>
 /// LOGIN/CREATE ACCOUNT - CLIENT TO SERVER, SERVER TO CLIENT 
 /// </summary>
@@ -338,8 +418,7 @@ public static class ClientToServerSignifiers
 {
     public const int CreateAccount = 1;
     public const int Login = 2;
-
-    public const int ColorChanged = 100;
+    
 }
 
 
@@ -351,6 +430,4 @@ public static class ServerToClientSignifiers
     public const int AccountCreationComplete = 4;
     public const int AccountCreationFailed = 5;
 
-
-    public const int ColorChanged = 100;
 }

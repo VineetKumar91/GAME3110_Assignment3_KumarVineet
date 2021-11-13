@@ -32,7 +32,10 @@ public class LoginSystem : MonoBehaviour
     // Client Object
     [SerializeField]
     NetworkedClient networkedClient;
-    
+
+    private string username;
+    private string password;
+
     // Connection variables
     private bool isEstablishingConnection = false;
     private bool executeOnce_establishConnection = true;
@@ -58,6 +61,10 @@ public class LoginSystem : MonoBehaviour
 
         // Login by default
         login_Toggle.GetComponent<Toggle>().isOn = true;
+
+
+        // Connect to server
+        Connect();
     }
 
 
@@ -112,8 +119,8 @@ public class LoginSystem : MonoBehaviour
     public void OnSubmitPressed()
     {
         // Submit button pressed
-        string username = username_InputField.GetComponent<InputField>().text;
-        string password = password_InputField.GetComponent<InputField>().text;
+        username = username_InputField.GetComponent<InputField>().text;
+        password = password_InputField.GetComponent<InputField>().text;
 
         string message;
 
@@ -136,9 +143,15 @@ public class LoginSystem : MonoBehaviour
         }
         else
         {
+            // If attempting to press submit without a valid connection, attempt connection
             fromServerTextField.color = Color.red;
             
-            fromServerTextField.text = "Connect First!";
+            fromServerTextField.text = "Attempting connection";
+
+            if (!networkedClient.IsConnected())
+            {
+                Connect();
+            }
         }
     }
 
@@ -161,6 +174,10 @@ public class LoginSystem : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Handle server response
+    /// </summary>
+    /// <param name="msg"></param>
     public void HandleResponseFromServer(string msg)
     {
         if (int.Parse(msg) == ServerToClientSignifiers.LoginComplete)
@@ -168,10 +185,10 @@ public class LoginSystem : MonoBehaviour
             fromServerTextField.color = Color.yellow;
             fromServerTextField.text = "Logging in!!!";
 
+            // Login successful, so this is the username that has to be set
+            GameManager.currentUsername = username;
+
             StartCoroutine(LoginDelay());
-
-            
-
         }
         else if (int.Parse(msg) == ServerToClientSignifiers.LoginFailedPassword)
         {
@@ -195,10 +212,14 @@ public class LoginSystem : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Coroutine for UX
+    /// </summary>
+    /// <returns></returns>
     IEnumerator LoginDelay()
     {
         yield return new WaitForSeconds(2f);
-        GameManager.GetInstance().ChangeMode(CurrentMode.GameRoom);
+        GameManager.GetInstance().ChangeMode(CurrentMode.Lobby);
 
         // Stopping Coroutines here
         StopAllCoroutines();
