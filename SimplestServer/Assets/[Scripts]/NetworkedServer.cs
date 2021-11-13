@@ -303,7 +303,7 @@ public class NetworkedServer : MonoBehaviour
         userTextForPanel.GetComponent<Text>().text = playerAccount.clientID + ": " + playerAccount.username;
 
         // Refresh player UI list after 2 seconds
-        StartCoroutine("RefreshClientPlayerUIList");
+        StartCoroutine("DelayedPlayerListUpdate");
     }
 
     /// <summary>
@@ -401,7 +401,7 @@ public class NetworkedServer : MonoBehaviour
     IEnumerator DelayedPlayerListUpdate()
     {
         yield return new WaitForSeconds(2f);
-        RefreshClientPlayerUIList();;
+        RefreshClientPlayerUIList();
     }
 
     /// <summary>
