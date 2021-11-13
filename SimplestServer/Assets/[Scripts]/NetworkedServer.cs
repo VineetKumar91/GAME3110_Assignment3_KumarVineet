@@ -171,7 +171,10 @@ public class NetworkedServer : MonoBehaviour
             case ClientToServerSignifiers.Login:
                 Login(receivedMessageSplit, id);
                 break;
-                
+
+            case ClientToServerSignifiers.PlayerListRequest:
+                SendPlayerListToClients(receivedMessageSplit, id);
+                break;
 
 
             default:
@@ -301,6 +304,26 @@ public class NetworkedServer : MonoBehaviour
         userTextForPanel.GetComponent<Text>().text = playerAccount.clientID + ": " + playerAccount.username;
     }
 
+    /// <summary>
+    /// Send Player List
+    /// </summary>
+    void SendPlayerListToClients(string[] receivedMessageSplit, int id)
+    {
+        string message = "";
+
+        foreach (var playerAccount in onlinePlayerAccounts)
+        {
+            // skip the requesting user's username 
+            if (receivedMessageSplit[1] == playerAccount.username)
+            {
+                continue;
+            }
+
+            message = playerAccount.username + ",";
+        }
+        SendMessageToClient( ServerToClientSignifiers.PlayerListSend + "," + message, id);
+    }
+
 
     /// <summary>
     /// Handle Client Disconnect to remove from current list
@@ -418,7 +441,8 @@ public static class ClientToServerSignifiers
 {
     public const int CreateAccount = 1;
     public const int Login = 2;
-    
+
+    public const int PlayerListRequest = 10;
 }
 
 
@@ -429,5 +453,7 @@ public static class ServerToClientSignifiers
     public const int LoginFailedUsername = 3;
     public const int AccountCreationComplete = 4;
     public const int AccountCreationFailed = 5;
+
+    public const int PlayerListSend = 10;
 
 }

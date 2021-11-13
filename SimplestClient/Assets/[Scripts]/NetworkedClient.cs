@@ -162,7 +162,7 @@ public class NetworkedClient : MonoBehaviour
         }
         else if(GameManager.currentMode == CurrentMode.Lobby)
         {
-            
+            LobbySystem.GetInstance().HandleResponseFromServer(msg);
         }
     }
 
@@ -181,7 +181,7 @@ public static class ClientToServerSignifiers
     public const int CreateAccount = 1;
     public const int Login = 2;
 
-    public const int ColorChanged = 100;
+    public const int PlayerListRequest = 10;
 }
 
 public static class ServerToClientSignifiers
@@ -192,7 +192,5 @@ public static class ServerToClientSignifiers
     public const int AccountCreationComplete = 4;
     public const int AccountCreationFailed = 5;
 
-
-
-    public const int ColorChanged = 100;
+    public const int PlayerListSend = 10;
 }
