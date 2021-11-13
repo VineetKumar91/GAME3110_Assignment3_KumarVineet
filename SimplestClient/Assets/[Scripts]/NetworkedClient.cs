@@ -150,7 +150,7 @@ public class NetworkedClient : MonoBehaviour
     private void ProcessRecievedMsg(string msg, int id)
     {
 
-        fromServerTextField.text = "Server: " + msg;
+        //fromServerTextField.text = "Server: " + msg;
         Debug.Log("msg recieved = " + msg + ".  connection id = " + id);
 
 
@@ -182,6 +182,7 @@ public static class ClientToServerSignifiers
     public const int Login = 2;
 
     public const int PlayerListRequest = 10;
+    public const int PlayerListRefresh = 11;
 }
 
 public static class ServerToClientSignifiers
@@ -193,4 +194,5 @@ public static class ServerToClientSignifiers
     public const int AccountCreationFailed = 5;
 
     public const int PlayerListSend = 10;
+    public const int PlayerListRefresh = 11;
 }

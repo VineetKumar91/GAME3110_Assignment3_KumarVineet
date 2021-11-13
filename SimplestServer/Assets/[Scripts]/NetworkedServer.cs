@@ -20,15 +20,13 @@ public class NetworkedServer : MonoBehaviour
     // General practice is to select a socket port that is not reserved for our system
     // So go for anything above 5000
     // Also host and client need to connect to the same port
-    int socketPort = 5111;      // Why this socket port number ??
+    int socketPort = 5111; // Why this socket port number ??
     int clientID1;
 
     // My tweak for basic chat send
-    [SerializeField]
-    private InputField inputFieldToClient;      // input field for text entry
+    [SerializeField] private InputField inputFieldToClient; // input field for text entry
 
-    [SerializeField]
-    private Text fromClientTextField;           // text field for showing sent message
+    [SerializeField] private Text fromClientTextField; // text field for showing sent message
 
     /// <summary>
     /// 4th Oct
@@ -89,7 +87,8 @@ public class NetworkedServer : MonoBehaviour
         byte error = 0;
 
         // Types of events that NetworkTransport.Receive can give -> connect, data, disconnect, nothing
-        NetworkEventType recNetworkEvent = NetworkTransport.Receive(out recHostID, out recConnectionID, out recChannelID, recBuffer, bufferSize, out dataSize, out error);
+        NetworkEventType recNetworkEvent = NetworkTransport.Receive(out recHostID, out recConnectionID,
+            out recChannelID, recBuffer, bufferSize, out dataSize, out error);
 
         switch (recNetworkEvent)
         {
@@ -109,7 +108,7 @@ public class NetworkedServer : MonoBehaviour
                 break;
         }
     }
-  
+
     // Button Pressed function to initiate the message to be sent to client
     public void ButtonPress()
     {
@@ -129,16 +128,16 @@ public class NetworkedServer : MonoBehaviour
         byte[] buffer = Encoding.Unicode.GetBytes(msg);
 
         // Server to Client send  using host and client ID
-        if(NetworkTransport.Send(hostID, id, reliableChannelID, buffer, msg.Length * sizeof(char), out error))
+        if (NetworkTransport.Send(hostID, id, reliableChannelID, buffer, msg.Length * sizeof(char), out error))
         {
-            Debug.Log("Message sent to client successfully.");      // Success!
+            Debug.Log("Message sent to client successfully."); // Success!
         }
         else
         {
             Debug.Log("Unsuccessful atttempt: ");
-            Debug.Log("Host ID: " + hostID);        // Host ID
-            Debug.Log("recid ID: " + id);           // Client ID
-            Debug.Log("error: " + error);           // Error Code
+            Debug.Log("Host ID: " + hostID); // Host ID
+            Debug.Log("recid ID: " + id); // Client ID
+            Debug.Log("error: " + error); // Error Code
         }
     }
 
@@ -181,7 +180,7 @@ public class NetworkedServer : MonoBehaviour
                 break;
         }
     }
-    
+
 
     /// <summary>
     /// Create account
@@ -245,7 +244,7 @@ public class NetworkedServer : MonoBehaviour
 
         // Read from file - load up the list
         Account_ReadFromFile();
-        PlayerAccount playerAccount = new PlayerAccount(null,null);
+        PlayerAccount playerAccount = new PlayerAccount(null, null);
 
         // check if player account exists via username
         // if no, login fails
@@ -264,7 +263,7 @@ public class NetworkedServer : MonoBehaviour
         }
 
         // If username actually exists
-        if(isUsernameExists)
+        if (isUsernameExists)
         {
             if (password != playerAccount.password)
             {
@@ -274,14 +273,14 @@ public class NetworkedServer : MonoBehaviour
             else
             {
                 SendMessageToClient(ServerToClientSignifiers.LoginComplete + "", id);
-                
+
                 // If login is successful, set the ID correctly
                 // ID IS ALLOCATED TO ONLY ONLINE AND LOGGED IN USERS SINCE THAT IS MODE OF REFERENCE
                 playerAccount.clientID = id;
                 onlinePlayerAccounts.AddLast(playerAccount);
 
-                // Notify Client side
-                NotifyClientLobby(playerAccount);
+                // Refresh server side list
+                RefreshServerSideList(playerAccount);
                 Debug.Log("Login Completed");
             }
         }
@@ -295,13 +294,16 @@ public class NetworkedServer : MonoBehaviour
 
 
     /// <summary>
-    /// Notify Client Lobby and update server user panel
+    /// Update server user panel
     /// </summary>
-    void NotifyClientLobby(PlayerAccount playerAccount)
+    void RefreshServerSideList(PlayerAccount playerAccount)
     {
         // Do some server side stuff first
         GameObject userTextForPanel = Instantiate(userpanelText, userPanel.transform);
         userTextForPanel.GetComponent<Text>().text = playerAccount.clientID + ": " + playerAccount.username;
+
+        // Refresh player UI list after 2 seconds
+        StartCoroutine("RefreshClientPlayerUIList");
     }
 
     /// <summary>
@@ -321,22 +323,23 @@ public class NetworkedServer : MonoBehaviour
 
             message = playerAccount.username + ",";
         }
-        SendMessageToClient( ServerToClientSignifiers.PlayerListSend + "," + message, id);
+
+        SendMessageToClient(ServerToClientSignifiers.PlayerListSend + "," + message, id);
     }
 
 
     /// <summary>
     /// Handle Client Disconnect to remove from current list
     /// </summary>
-    /// <param name="clientID"></param>
-    public void ClientDisconnect(int clientID)
+    /// <param name="id"></param>
+    public void ClientDisconnect(int id)
     {
         Debug.Log("Before Removing");
         DebugPurposes_DisplayOnlinePlayerAccounts();
 
         foreach (var playerAccount in onlinePlayerAccounts)
         {
-            if (playerAccount.clientID == clientID)
+            if (playerAccount.clientID == id)
             {
                 foreach (Transform child in userPanel.transform)
                 {
@@ -355,6 +358,28 @@ public class NetworkedServer : MonoBehaviour
 
         Debug.Log("After Removing");
         DebugPurposes_DisplayOnlinePlayerAccounts();
+
+        // Refresh Client side list
+        RefreshClientPlayerUIList();
+    }
+
+    /// <summary>
+    /// Refresh Client Player UI panel on disconnect or new user join
+    /// </summary>
+    void RefreshClientPlayerUIList()
+    {
+        // Send Refresh List to Client
+        string message = "";
+
+        foreach (var playerAccount in onlinePlayerAccounts)
+        {
+            message = playerAccount.username + ",";
+        }
+
+        foreach (var playerAccount in onlinePlayerAccounts)
+        {
+            SendMessageToClient(ServerToClientSignifiers.PlayerListRefresh + "," + message, playerAccount.clientID);
+        }
     }
 
     /// <summary>
@@ -368,6 +393,16 @@ public class NetworkedServer : MonoBehaviour
         }
     }
 
+
+    /// <summary>
+    /// Delay of 2s and call refresh client player UI list
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator DelayedPlayerListUpdate()
+    {
+        yield return new WaitForSeconds(2f);
+        RefreshClientPlayerUIList();;
+    }
 
     /// <summary>
     /// Functions for writing and reading to file 
@@ -443,6 +478,7 @@ public static class ClientToServerSignifiers
     public const int Login = 2;
 
     public const int PlayerListRequest = 10;
+    public const int PlayerListRefresh = 11;
 }
 
 
@@ -455,5 +491,6 @@ public static class ServerToClientSignifiers
     public const int AccountCreationFailed = 5;
 
     public const int PlayerListSend = 10;
+    public const int PlayerListRefresh = 11;
 
 }

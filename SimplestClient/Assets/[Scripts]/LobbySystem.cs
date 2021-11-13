@@ -58,15 +58,13 @@ public class LobbySystem : MonoBehaviour
         playerNameList.Add(GameManager.currentUsername);
         LoadOurselfInPlayerList();
 
+        StartCoroutine("DelayedUpdate");
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            GetPlayerListFromServer();
-        }
+
     }
 
     /// <summary>
@@ -97,6 +95,10 @@ public class LobbySystem : MonoBehaviour
         {
             LoadPlayerList(receivedMessageSplit);
         }
+        else if (signifer == ServerToClientSignifiers.PlayerListRefresh)
+        {
+            RefreshPlayerList(receivedMessageSplit);
+        }
     }
 
     /// <summary>
@@ -110,7 +112,6 @@ public class LobbySystem : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-
         // Clear the player list  
        playerNameList.Clear();
 
@@ -118,22 +119,53 @@ public class LobbySystem : MonoBehaviour
        playerNameList.Add(GameManager.currentUsername);
 
        for (int i = 1; i < msg.Length; i++)
-        {
+       {
             // Skip empty usernames
             if (msg[i] != "")
             {
                 playerNameList.Add(msg[i]);
             }
+       }
+
+       // Load that UI Panel with updated player list
+        foreach (var username in playerNameList)
+        {
+            GameObject usernameText = Instantiate(UsernameTextObject, UsersPanel.transform);
+            usernameText.GetComponent<Text>().text = username;
+            Debug.Log("Usernames:" + username);
+        }
+    }
+
+
+    void RefreshPlayerList(string[] msg)
+    {
+        // Clear the player list text in UI Panel first
+        foreach (Transform child in UsersPanel.transform)
+        {
+            Destroy(child.gameObject);
         }
 
-        
+        // Clear the player list  
+        playerNameList.Clear();
+
+        // Add current username
+        playerNameList.Add(GameManager.currentUsername);
+
+        for (int i = 1; i < msg.Length; i++)
+        {
+            // Skip empty usernames
+            if (msg[i] != "" && msg[i] != GameManager.currentUsername)
+            {
+                playerNameList.Add(msg[i]);
+            }
+        }
 
         // Load that UI Panel with updated player list
         foreach (var username in playerNameList)
         {
             GameObject usernameText = Instantiate(UsernameTextObject, UsersPanel.transform);
             usernameText.GetComponent<Text>().text = username;
-            Debug.Log("Usernames:" + username);
+            Debug.Log("RefreshUsernames:" + username);
         }
     }
 
@@ -185,6 +217,16 @@ public class LobbySystem : MonoBehaviour
             // empty the chat input field
             ChatInputField.text = "";
         }
+    }
+
+    /// <summary>
+    /// Get PlayerList from server after 1.5s delay
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator DelayedUpdate()
+    {
+        yield return new WaitForSeconds(1.5f);
+        GetPlayerListFromServer();
     }
 }
 

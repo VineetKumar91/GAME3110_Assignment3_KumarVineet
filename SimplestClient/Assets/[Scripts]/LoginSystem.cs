@@ -218,10 +218,7 @@ public class LoginSystem : MonoBehaviour
     /// <returns></returns>
     IEnumerator LoginDelay()
     {
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(0.5f);
         GameManager.GetInstance().ChangeMode(CurrentMode.Lobby);
-
-        // Stopping Coroutines here
-        StopAllCoroutines();
     }
 }
