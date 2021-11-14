@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class LobbySystem : MonoBehaviour
@@ -23,6 +24,9 @@ public class LobbySystem : MonoBehaviour
     public GameObject ChatPanel_ScrollView;
     public GameObject TextObject;
     public InputField ChatInputField;
+
+    public bool isPMUserSelected = false;
+    public string PMUser = "";
 
     [Header("Player System")] 
     [SerializeField]
@@ -64,7 +68,10 @@ public class LobbySystem : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            GetPMPlayer();
+        }
     }
 
     /// <summary>
@@ -178,6 +185,17 @@ public class LobbySystem : MonoBehaviour
         usernameText.GetComponent<Text>().text = GameManager.currentUsername;
     }
 
+    private void GetPMPlayer()
+    {
+        if (isPMUserSelected)
+        {
+            Debug.Log("PM to " +PMUser);
+        }
+        else
+        {
+            Debug.Log("PM player not selected");
+        }
+    }
 
     /// <summary>
     /// Send message
@@ -206,7 +224,7 @@ public class LobbySystem : MonoBehaviour
     /// <summary>
     /// Send Button onClick
     /// </summary>
-    public void SendChatButton()
+    public void Button_SendMessage()
     {
         // If empty, do nothing
         if (ChatInputField.text != "")

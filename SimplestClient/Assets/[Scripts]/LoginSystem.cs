@@ -171,6 +171,7 @@ public class LoginSystem : MonoBehaviour
     {
         // Create toggle pressed, switch off login toggle
         login_Toggle.GetComponent<Toggle>().SetIsOnWithoutNotify(!newValue);
+        login_Toggle.GetComponent<Toggle>().SetIsOnWithoutNotify(!newValue);
     }
 
 

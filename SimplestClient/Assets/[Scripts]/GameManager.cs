@@ -24,7 +24,7 @@ public class GameManager : MonoBehaviour
     Canvas LoginCanvas;
 
     [SerializeField] 
-    Canvas GameRoomCanvas;
+    GameObject Lobby;
 
 
     private void Start()
@@ -56,7 +56,7 @@ public class GameManager : MonoBehaviour
 
             case CurrentMode.Lobby:
                 LoginCanvas.gameObject.SetActive(false);
-                GameRoomCanvas.gameObject.SetActive(true);
+                Lobby.gameObject.SetActive(true);
                 break;
 
             case CurrentMode.GameRoom:
