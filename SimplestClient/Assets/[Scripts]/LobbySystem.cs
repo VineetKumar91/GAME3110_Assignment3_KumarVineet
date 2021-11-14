@@ -34,6 +34,11 @@ public class LobbySystem : MonoBehaviour
     public GameObject UsersPanel;
     public GameObject UsernameTextObject;
 
+    [Header("Join Game System")]
+    [SerializeField]
+    private Text JoinGameStatus;
+
+
 
     // reference to login instance
     private static LobbySystem _instance;
@@ -68,6 +73,8 @@ public class LobbySystem : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // TODO: PM CHAT COMPLETION
+        // TODO: GENERAL CHAT COMPLETION
         if (Input.GetKeyDown(KeyCode.P))
         {
             GetPMPlayer();
@@ -106,6 +113,27 @@ public class LobbySystem : MonoBehaviour
         {
             RefreshPlayerList(receivedMessageSplit);
         }
+        else if (signifer == ServerToClientSignifiers.PlayerJoinGameSendYes)
+        {
+            GameManager.GetInstance().ChangeMode(CurrentMode.GameRoom);
+        }
+        else if (signifer == ServerToClientSignifiers.PlayerJoinGameSendNo)
+        {
+
+        }
+        else if (signifer == ServerToClientSignifiers.PlayerSpectateGameSend)
+        {
+
+        }
+    }
+
+    /// <summary>
+    /// Add self to player list (only for first time)
+    /// </summary>
+    void LoadOurselfInPlayerList()
+    {
+        GameObject usernameText = Instantiate(UsernameTextObject, UsersPanel.transform);
+        usernameText.GetComponent<Text>().text = GameManager.currentUsername;
     }
 
     /// <summary>
@@ -144,6 +172,10 @@ public class LobbySystem : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Refresh Player list
+    /// </summary>
+    /// <param name="msg"></param>
     void RefreshPlayerList(string[] msg)
     {
         // Clear the player list text in UI Panel first
@@ -176,15 +208,39 @@ public class LobbySystem : MonoBehaviour
         }
     }
 
+   
+
     /// <summary>
-    /// Add self to player list (only for first time)
+    /// Join Game Press function
     /// </summary>
-    void LoadOurselfInPlayerList()
+    public void Button_JoinGame()
     {
-        GameObject usernameText = Instantiate(UsernameTextObject, UsersPanel.transform);
-        usernameText.GetComponent<Text>().text = GameManager.currentUsername;
+        string message = "";
+
+        if (networkedClient.IsConnected())
+        {
+            message = ClientToServerSignifiers.PlayerJoinGameRequest + "," + GameManager.currentUsername;
+            networkedClient.SendMessageToHost(message); 
+        }
     }
 
+    /// <summary>
+    /// Spectate Game function
+    /// </summary>
+    public void Button_SpectateGame()
+    {
+        string message = "";
+
+        if (networkedClient.IsConnected())
+        {
+            message = ClientToServerSignifiers.PlayerSpectateGameRequest + "," + GameManager.currentUsername;
+            networkedClient.SendMessageToHost(message);
+        }
+    }
+
+    /// <summary>
+    /// PM Player
+    /// </summary>
     private void GetPMPlayer()
     {
         if (isPMUserSelected)

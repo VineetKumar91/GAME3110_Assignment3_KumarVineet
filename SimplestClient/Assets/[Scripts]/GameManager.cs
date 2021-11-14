@@ -26,6 +26,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] 
     GameObject Lobby;
 
+    [SerializeField]
+    GameObject GameRoom;
+
 
     private void Start()
     {
@@ -50,17 +53,26 @@ public class GameManager : MonoBehaviour
         switch (currentMode)
         {
             case CurrentMode.Login:
+                GameRoom.gameObject.SetActive(false);
+                Lobby.gameObject.SetActive(false);
+
                 LoginCanvas.gameObject.SetActive(true);
                 break;
 
 
             case CurrentMode.Lobby:
                 LoginCanvas.gameObject.SetActive(false);
+                GameRoom.gameObject.SetActive(false);
+
                 Lobby.gameObject.SetActive(true);
                 break;
 
             case CurrentMode.GameRoom:
+                LoginCanvas.gameObject.SetActive(false);
+                Lobby.gameObject.SetActive(false);
 
+
+                GameRoom.gameObject.SetActive(true);
                 break;
         }
     }

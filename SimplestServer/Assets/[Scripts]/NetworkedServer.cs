@@ -45,6 +45,8 @@ public class NetworkedServer : MonoBehaviour
     public GameObject userPanel;
     public GameObject userpanelText;
 
+    public Queue<PlayerAccount> GameRoomQueue;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -72,7 +74,11 @@ public class NetworkedServer : MonoBehaviour
         // create a filepath
         filePath = Application.dataPath + Path.DirectorySeparatorChar + "AccountDatabase.txt";
 
+        // create new online player account LL
         onlinePlayerAccounts = new LinkedList<PlayerAccount>();
+
+        // create new gameroom player queue
+        GameRoomQueue = new Queue<PlayerAccount>();
     }
 
     // Update is called once per frame
@@ -175,6 +181,13 @@ public class NetworkedServer : MonoBehaviour
                 SendPlayerListToClients(receivedMessageSplit, id);
                 break;
 
+            case ClientToServerSignifiers.PlayerJoinGameRequest:
+                JoinGameRequest(receivedMessageSplit, id);
+                break;
+
+            case ClientToServerSignifiers.PlayerSpectateGameRequest:
+                SpectateGameRequest(receivedMessageSplit, id);
+                break;
 
             default:
                 break;
@@ -382,6 +395,48 @@ public class NetworkedServer : MonoBehaviour
         }
     }
 
+    //-------Player JOIN, SPECTATE-------//
+    /// <summary>
+    /// Join Game Request
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
+    /// <param name="id"></param>
+    void JoinGameRequest(string[] receivedMessageSplit, int id)
+    {
+        Debug.Log("ReceivedMessage 0 "+ receivedMessageSplit[0] );
+        Debug.Log("ReceivedMessage 1 "+ receivedMessageSplit[1] );
+        if (GameRoomQueue.Count < 2) // Check if game room is available
+        {
+            PlayerAccount joinPlayerAccount = new PlayerAccount();
+            foreach (var playerAccount in onlinePlayerAccounts)
+            {
+                if (playerAccount.username == receivedMessageSplit[1])
+                {
+                    joinPlayerAccount = playerAccount;
+                    break;
+                }
+            }
+            GameRoomQueue.Enqueue(joinPlayerAccount);
+
+            // Test ID
+            Debug.Log("ID Parameter = " + id);
+            Debug.Log("ID from List = " + joinPlayerAccount.clientID);
+
+            SendMessageToClient(ServerToClientSignifiers.PlayerJoinGameSendYes + ",", id);
+
+        }
+        else    // Game Room occupied
+        {
+            SendMessageToClient(ServerToClientSignifiers.PlayerJoinGameSendNo + ",", id);
+        }
+    }
+
+
+    void SpectateGameRequest(string[] receivedMessageSplit, int id)
+    {
+
+    }
+
     /// <summary>
     /// Debug purposes function
     /// </summary>
@@ -461,6 +516,8 @@ public class PlayerAccount
 {
     public string username, password;
     public int clientID;
+
+    public PlayerAccount() {}
     public PlayerAccount(string username, string password)
     {
         this.username = username;
@@ -479,6 +536,9 @@ public static class ClientToServerSignifiers
 
     public const int PlayerListRequest = 10;
     public const int PlayerListRefresh = 11;
+
+    public const int PlayerJoinGameRequest = 20;
+    public const int PlayerSpectateGameRequest = 21;
 }
 
 
@@ -493,4 +553,7 @@ public static class ServerToClientSignifiers
     public const int PlayerListSend = 10;
     public const int PlayerListRefresh = 11;
 
+    public const int PlayerJoinGameSendYes = 20;
+    public const int PlayerJoinGameSendNo = 21;
+    public const int PlayerSpectateGameSend = 22;
 }
