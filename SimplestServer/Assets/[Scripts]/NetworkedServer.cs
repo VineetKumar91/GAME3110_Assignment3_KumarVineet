@@ -4,6 +4,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 using System.IO;
+using System.Linq;
 using UnityEngine.UI;
 
 /// <summary>
@@ -45,7 +46,7 @@ public class NetworkedServer : MonoBehaviour
     public GameObject userPanel;
     public GameObject userpanelText;
 
-    public Queue<PlayerAccount> GameRoomQueue;
+    public List<PlayerAccount> GameRoomPlayerList;
 
     // Start is called before the first frame update
     void Start()
@@ -77,8 +78,9 @@ public class NetworkedServer : MonoBehaviour
         // create new online player account LL
         onlinePlayerAccounts = new LinkedList<PlayerAccount>();
 
-        // create new gameroom player queue
-        GameRoomQueue = new Queue<PlayerAccount>();
+        // create new gameroom player list with capacity 2
+        GameRoomPlayerList = new List<PlayerAccount>();
+        GameRoomPlayerList.Capacity = 2;
     }
 
     // Update is called once per frame
@@ -347,13 +349,24 @@ public class NetworkedServer : MonoBehaviour
     /// <param name="id"></param>
     public void ClientDisconnect(int id)
     {
-        Debug.Log("Before Removing");
+        Debug.Log("Before Removing Count = " + onlinePlayerAccounts.Count);
         DebugPurposes_DisplayOnlinePlayerAccounts();
 
-        foreach (var playerAccount in onlinePlayerAccounts)
+        foreach (var playerAccount in onlinePlayerAccounts.ToList())
         {
             if (playerAccount.clientID == id)
             {
+                // Remove from GameRoomPlayer
+                foreach (var gameRoomPlayer in GameRoomPlayerList)
+                {
+                    if (gameRoomPlayer.clientID == id)
+                    {
+                        GameRoomPlayerList.Remove(gameRoomPlayer);
+                        break;
+                    }
+                }
+
+                // Remove from Display
                 foreach (Transform child in userPanel.transform)
                 {
                     if (child.gameObject.GetComponent<Text>().text ==
@@ -363,9 +376,7 @@ public class NetworkedServer : MonoBehaviour
                         break;
                     }
                 }
-
                 onlinePlayerAccounts.Remove(playerAccount);
-                break;
             }
         }
 
@@ -405,7 +416,7 @@ public class NetworkedServer : MonoBehaviour
     {
         Debug.Log("ReceivedMessage 0 "+ receivedMessageSplit[0] );
         Debug.Log("ReceivedMessage 1 "+ receivedMessageSplit[1] );
-        if (GameRoomQueue.Count < 2) // Check if game room is available
+        if (GameRoomPlayerList.Count < 2) // Check if game room is available
         {
             PlayerAccount joinPlayerAccount = new PlayerAccount();
             foreach (var playerAccount in onlinePlayerAccounts)
@@ -416,14 +427,25 @@ public class NetworkedServer : MonoBehaviour
                     break;
                 }
             }
-            GameRoomQueue.Enqueue(joinPlayerAccount);
+            GameRoomPlayerList.Add(joinPlayerAccount);
 
             // Test ID
             Debug.Log("ID Parameter = " + id);
             Debug.Log("ID from List = " + joinPlayerAccount.clientID);
 
-            SendMessageToClient(ServerToClientSignifiers.PlayerJoinGameSendYes + ",", id);
-
+            // If 1, then waiting
+            if (GameRoomPlayerList.Count == 1)
+            {
+                SendMessageToClient(ServerToClientSignifiers.PlayerJoinGameSendWaiting + ",", id);
+            }
+            else if (GameRoomPlayerList.Count == 2)
+            {
+                // If 2, then ready
+                foreach (var gameRoomPlayer in GameRoomPlayerList)
+                {
+                    SendMessageToClient(ServerToClientSignifiers.PlayerJoinGameSendYes + ",", gameRoomPlayer.clientID);
+                }
+            }
         }
         else    // Game Room occupied
         {
@@ -442,9 +464,16 @@ public class NetworkedServer : MonoBehaviour
     /// </summary>
     private void DebugPurposes_DisplayOnlinePlayerAccounts()
     {
+        // Online players
         foreach (var playerAccount in onlinePlayerAccounts)
         {
             Debug.Log(playerAccount.username + "_" + playerAccount.password + "_" + playerAccount.clientID);
+        }
+
+        // Queue
+        foreach (var playerAccount in GameRoomPlayerList)
+        {
+            Debug.Log("GameRoom Queue Players: " + playerAccount.username);
         }
     }
 
@@ -555,5 +584,6 @@ public static class ServerToClientSignifiers
 
     public const int PlayerJoinGameSendYes = 20;
     public const int PlayerJoinGameSendNo = 21;
-    public const int PlayerSpectateGameSend = 22;
+    public const int PlayerJoinGameSendWaiting = 22;
+    public const int PlayerSpectateGameSend = 23;
 }

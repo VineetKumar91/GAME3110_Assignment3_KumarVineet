@@ -67,6 +67,8 @@ public class LobbySystem : MonoBehaviour
         playerNameList.Add(GameManager.currentUsername);
         LoadOurselfInPlayerList();
 
+        JoinGameStatus.text = "Press Join to join game room queue";
+
         StartCoroutine("DelayedUpdate");
     }
 
@@ -113,9 +115,13 @@ public class LobbySystem : MonoBehaviour
         {
             RefreshPlayerList(receivedMessageSplit);
         }
+        else if (signifer == ServerToClientSignifiers.PlayerJoinGameSendWaiting)
+        {
+            JoinGameStatus.text = "Waiting for Player 2...";
+        }
         else if (signifer == ServerToClientSignifiers.PlayerJoinGameSendYes)
         {
-            GameManager.GetInstance().ChangeMode(CurrentMode.GameRoom);
+            //GameManager.GetInstance().ChangeMode(CurrentMode.GameRoom);
         }
         else if (signifer == ServerToClientSignifiers.PlayerJoinGameSendNo)
         {

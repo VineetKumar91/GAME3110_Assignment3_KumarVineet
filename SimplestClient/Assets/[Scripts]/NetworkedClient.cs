@@ -186,6 +186,9 @@ public static class ClientToServerSignifiers
 
     public const int PlayerJoinGameRequest = 20;
     public const int PlayerSpectateGameRequest = 21;
+
+    public const int PlayersInGameRequest = 30;
+    public const int PlayersSpectatingRequest = 31;
 }
 
 public static class ServerToClientSignifiers
@@ -201,5 +204,9 @@ public static class ServerToClientSignifiers
 
     public const int PlayerJoinGameSendYes = 20;
     public const int PlayerJoinGameSendNo = 21;
-    public const int PlayerSpectateGameSend = 22;
+    public const int PlayerJoinGameSendWaiting = 22;
+    public const int PlayerSpectateGameSend = 23;
+
+    public const int PlayersInGameSend = 30;
+    public const int PlayersSpectatingSend = 31;
 }
