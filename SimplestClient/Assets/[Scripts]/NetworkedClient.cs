@@ -193,6 +193,7 @@ public static class ClientToServerSignifiers
 
     public const int GameRoomPlayersRequest = 30;
     public const int GameRoomSpectatorsRequest = 31;
+    public const int GameRoomSpectatorLeave = 32;
 
     public const int PlayedPlayer1Turn = 100;
     public const int PlayedPlayer2Turn = 101;
@@ -212,11 +213,14 @@ public static class ServerToClientSignifiers
     public const int PlayerJoinGameSendYes = 20;
     public const int PlayerJoinGameSendNo = 21;
     public const int PlayerJoinGameSendWaiting = 22;
-    public const int PlayerSpectateGameSend = 23;
+    public const int PlayerSpectateGameSend = 23; 
+    public const int PlayerSpectatorRefresh = 24;
 
     public const int GameRoomPlayersSend = 30;
     public const int GameRoomSpectatorsSend = 31;
+    public const int GameRoomSpectatorLeft = 32;
 
     public const int Player2TurnReceive = 100;
     public const int Player1TurnReceive = 101;
+    public const int SpectatorTurnReceive = 102;
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -32,27 +33,44 @@ public class GameRoomSystem : MonoBehaviour
     public bool isMatchActive;
     public int winningPlayer = 0;
 
-    [SerializeField] private Text currentTurn;
+    [SerializeField] 
+    private Text currentTurn;
 
-    [SerializeField] private Text PresetMessagePlayer1;
+    [SerializeField] 
+    private Text PresetMessagePlayer1;
 
-    [SerializeField] private Text PresetMessagePlayer2;
+    [SerializeField] 
+    private Text PresetMessagePlayer2;
 
     [Header("TicTacToe")]
     // Buttons list
     public List<Button> AllButtons;
 
-    [SerializeField] private GameObject TicTacToeObject;
+    [SerializeField] 
+    private GameObject TicTacToeObject;
 
-    [SerializeField] private GameObject buttonPrefab;
+    [SerializeField] 
+    private GameObject buttonPrefab;
 
     [Header("Networked Client")] [SerializeField]
     private NetworkedClient networkedClient;
 
 
-    [Header("Replay")] [SerializeField] private ReplaySystem replaySystemRef;
-
+    [Header("Replay")] 
+    [SerializeField] 
+    private ReplaySystem replaySystemRef;
     public bool isReplayOn = false;
+
+    [Header("Spectator")]
+    public bool isPlayer = false;
+    public GameObject SpectatorPanel;
+    public GameObject SpectatorUsernameTextObject;
+
+    [Header("Back Button")] 
+    [SerializeField]
+    private Text FinishGameFirst;
+
+    
 
     public static GameRoomSystem GetInstance()
     {
@@ -64,8 +82,16 @@ public class GameRoomSystem : MonoBehaviour
         _instance = this;
 
         // ARGH!!! WHY DO I ALWAYS FORGET
-        playerList = new List<string>();
-        spectatorList = new List<string>();
+
+        if (playerList == null)
+        {
+            playerList = new List<string>();
+        }
+
+        if (spectatorList == null)
+        {
+            spectatorList = new List<string>();
+        }
 
         // Array initialization by size
         TicTacToeGame = new int[3, 3];
@@ -108,6 +134,33 @@ public class GameRoomSystem : MonoBehaviour
 
         isPlayer1Turn = true;
         isMatchActive = true;
+
+        // Take a second before updating this because of the latency
+        StartCoroutine("SetPlayerOrSpectator");
+
+    }
+
+    IEnumerator SetPlayerOrSpectator()
+    {
+        yield return new WaitForSeconds(2f);
+        foreach (var player in playerList)
+        {
+            if (GameManager.currentUsername == player)
+            {
+                isPlayer = true;
+            }
+        }
+
+        foreach (var spectator in spectatorList)
+        {
+            if (GameManager.currentUsername == spectator)
+            {
+                foreach (var button in AllButtons)
+                {
+                    button.interactable = false;
+                }
+            }
+        }
     }
 
     void Update()
@@ -130,7 +183,7 @@ public class GameRoomSystem : MonoBehaviour
         }
         else if (signifer == ServerToClientSignifiers.GameRoomSpectatorsSend)
         {
-            GameRoomSpectatorsSend(receivedMessageSplit);
+            //GameRoomSpectatorsSend(receivedMessageSplit);
         }
         else if (signifer == ServerToClientSignifiers.Player1TurnReceive)
         {
@@ -140,21 +193,106 @@ public class GameRoomSystem : MonoBehaviour
         {
             ReceivePlayer1Turn(receivedMessageSplit);
         }
+        else if (signifer == ServerToClientSignifiers.PlayerSpectatorRefresh)
+        {
+            PlayerSpectatorRefresh(receivedMessageSplit);
+        }
+        else if (signifer == ServerToClientSignifiers.GameRoomSpectatorLeft)
+        {
+            SpectatorIsLeavingNow(receivedMessageSplit);
+        }
+        else if (signifer == ServerToClientSignifiers.SpectatorTurnReceive)
+        {
+            SpectatorTurnReceive(receivedMessageSplit);
+        }
+    }
+
+   
+    /// <summary>
+    /// Spectator has to be removed from game room list
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
+    private void SpectatorIsLeavingNow(string[] receivedMessageSplit)
+    {
+        foreach (var playerSpectatorAcc in spectatorList)
+        {
+            if (playerSpectatorAcc == GameManager.currentUsername)
+            {
+                spectatorList.Remove(playerSpectatorAcc);
+                break;
+            }
+        }
+
+        // Change the mode to lobby
+        GameManager.GetInstance().ChangeMode(CurrentMode.Lobby);
+    }
+
+    /// <summary>
+    /// Refreshes the spectator list
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
+    private void PlayerSpectatorRefresh(string[] receivedMessageSplit)
+    {
+        // Clear the list
+        spectatorList.Clear();
+
+        // Destroy the spectator UI game objects
+        foreach (Transform child in SpectatorPanel.transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        
+
+        // Add to local list
+        for (int i = 1; i < receivedMessageSplit.Length; i++)
+        {
+            if (receivedMessageSplit[i] != "")
+            {
+                spectatorList.Add(receivedMessageSplit[i]);
+            }
+        }
+        
+        // Instantiate those game objects
+        foreach (var spectatorUsername in spectatorList)
+        {
+            GameObject spectatorGameObject = Instantiate(SpectatorUsernameTextObject, SpectatorPanel.transform);
+            spectatorGameObject.GetComponent<Text>().text = spectatorUsername;
+        }
     }
 
     /// <summary>
     /// Spectator List Send
     /// </summary>
     /// <param name="receivedMessageSplit"></param>
-    private void GameRoomSpectatorsSend(string[] receivedMessageSplit)
-    {
-        for (int i = 1; i < receivedMessageSplit.Length; i++)
-        {
-            spectatorList.Add(receivedMessageSplit[i]);
-        }
-
-        //TODO: Spectator Mode, Prefixed Message
-    }
+    //private void GameRoomSpectatorsSend(string[] receivedMessageSplit)
+    //{
+    //    // Clear the list
+    //    spectatorList.Clear();
+    //
+    //    // Destroy the spectator UI game objects
+    //    foreach (Transform child in SpectatorPanel.transform)
+    //    {
+    //        Destroy(child.gameObject);
+    //    }
+    //
+    //    // Add to local list
+    //    for (int i = 1; i < receivedMessageSplit.Length; i++)
+    //    {
+    //        if (receivedMessageSplit[i] != "")
+    //        {
+    //            spectatorList.Add(receivedMessageSplit[i]);
+    //        }
+    //    }
+    //    
+    //
+    //    // Instantiate those game objects
+    //    foreach (var spectatorUsername in spectatorList)
+    //    {
+    //        GameObject spectatorGameObject = Instantiate(SpectatorUsernameTextObject, SpectatorPanel.transform);
+    //        spectatorGameObject.GetComponent<Text>().text = spectatorUsername;
+    //    }
+    //}
 
 
     /// <summary>
@@ -229,6 +367,11 @@ public class GameRoomSystem : MonoBehaviour
 
         WinConditionCheck();
 
+        // Set the warning message as inactive
+        if (FinishGameFirst.IsActive())
+        {
+            FinishGameFirst.gameObject.SetActive(false);
+        }
     }
 
 
@@ -329,6 +472,50 @@ public class GameRoomSystem : MonoBehaviour
     }
 
     /// <summary>
+    /// Receive turn of the players by the spectator
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
+    private void SpectatorTurnReceive(string[] receivedMessageSplit)
+    {
+        Vector2Int positionPlayed =
+            new Vector2Int(int.Parse(receivedMessageSplit[1]),
+                int.Parse(receivedMessageSplit[2]));
+
+        string symbol = receivedMessageSplit[3];
+
+        foreach (var button in AllButtons)
+        {
+            ButtonHandler buttonHandler = button.GetComponent<ButtonHandler>();
+            if (positionPlayed == buttonHandler.buttonPosition)
+            {
+
+                button.GetComponentInChildren<Text>().text = symbol;
+
+                // Tictactoe update
+                TicTacToeGame[buttonHandler.buttonPosition.x, buttonHandler.buttonPosition.y] = player1;
+
+                // Update Replay Order
+                replaySystemRef.movesOrder.Enqueue(
+                    new ReplaySystem.MovesOrderClass(buttonHandler.buttonPosition, player1));
+
+                isPlayer1Turn = false;
+
+                movesDone++;
+
+                if (symbol == "X")
+                {
+                    currentTurn.text = "Turn: " + playerList[1];
+                }
+                else
+                {
+                    currentTurn.text = "Turn: " + playerList[0];
+                }
+            }
+        }
+    }
+
+
+    /// <summary>
     /// Activate Replay
     /// </summary>
     public void Button_ActivateReplay()
@@ -338,6 +525,24 @@ public class GameRoomSystem : MonoBehaviour
             isReplayOn = true;
             ClearButtons();
             StartCoroutine("ReplayModePlay");
+        }
+    }
+
+
+    public void Button_Back()
+    {
+        // Match is on and you are a player who wants to go back... NO!
+        if (isMatchActive && isPlayer)
+        {
+            FinishGameFirst.gameObject.SetActive(true);
+        }
+        else if (isMatchActive && !isPlayer)
+        {
+            string msg = "";
+
+            msg += ClientToServerSignifiers.GameRoomSpectatorLeave + ",";
+
+            networkedClient.SendMessageToHost(msg);
         }
     }
 

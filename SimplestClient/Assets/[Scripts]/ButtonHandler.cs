@@ -34,15 +34,6 @@ public class ButtonHandler : MonoBehaviour, IPointerClickHandler
                 // Symbol
                 buttonText.text = "X";
                 GameRoomSystem.GetInstance().PlayTurn(buttonPosition);
-                //if (GameRoomSystem.GetInstance().isPlayer1)
-                //{
-                //    
-                //}
-                //else
-                //{
-                //    buttonText.text = "O";
-                //    GameRoomSystem.GetInstance().PlayTurn(buttonPosition);
-                //}
 
                 button.interactable = false;
             }
@@ -56,33 +47,5 @@ public class ButtonHandler : MonoBehaviour, IPointerClickHandler
                 button.interactable = false;
             }
         }
-
-
-        
-
-       // // Check button is interactable
-       // if (button.interactable && GameRoomSystem.GetInstance().isPlayer1Turn)
-       // {
-       //     // Symbol
-       //     buttonText.text = "X";
-       //     GameRoomSystem.GetInstance().PlayTurn(buttonPosition);
-       //     //if (GameRoomSystem.GetInstance().isPlayer1)
-       //     //{
-       //     //    
-       //     //}
-       //     //else
-       //     //{
-       //     //    buttonText.text = "O";
-       //     //    GameRoomSystem.GetInstance().PlayTurn(buttonPosition);
-       //     //}
-       //
-       //     button.interactable = false;
-       // }
-       // else if (button.interactable && !GameRoomSystem.GetInstance().isPlayer1Turn)
-       // {
-       //     buttonText.text = "O";
-       //     GameRoomSystem.GetInstance().PlayTurn(buttonPosition);
-       //     button.interactable = false;
-       // }
     }
 }

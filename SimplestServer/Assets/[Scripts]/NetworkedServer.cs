@@ -203,6 +203,10 @@ public class NetworkedServer : MonoBehaviour
                 GameRoomSpectatorsRequest(receivedMessageSplit, id);
                 break;
 
+            case ClientToServerSignifiers.GameRoomSpectatorLeave:
+                GameRoomSpectatorLeave(receivedMessageSplit, id);
+                break;
+
 
             case ClientToServerSignifiers.PlayedPlayer1Turn:
                 Player1TurnPlayed(receivedMessageSplit,id);
@@ -216,7 +220,8 @@ public class NetworkedServer : MonoBehaviour
                 break;
         }
     }
-    
+
+   
 
     /// <summary>
     /// Create account
@@ -387,6 +392,16 @@ public class NetworkedServer : MonoBehaviour
                     }
                 }
 
+                // Remove from GameRoomPlayer
+                foreach (var gameRoomSpectator in GameRoomSpectatorList)
+                {
+                    if (gameRoomSpectator.clientID == id)
+                    {
+                        GameRoomPlayerList.Remove(gameRoomSpectator);
+                        break;
+                    }
+                }
+
                 // Remove from Display
                 foreach (Transform child in userPanel.transform)
                 {
@@ -500,6 +515,60 @@ public class NetworkedServer : MonoBehaviour
         {
             SendMessageToClient(ServerToClientSignifiers.PlayerSpectateGameSend + ",", id);
         }
+
+
+        RefreshSpectatorListForPlayerAndSpectator();
+
+    }
+
+
+    /// <summary>
+    /// Spectator Leave
+    /// </summary>
+    private void GameRoomSpectatorLeave(string[] receivedMessageSplit, int id)
+    {
+        foreach (var playerAccount in GameRoomSpectatorList)
+        {
+            if (playerAccount.clientID == id)
+            {
+                GameRoomSpectatorList.Remove(playerAccount);
+                break;
+            }
+        }
+
+        RefreshSpectatorListForPlayerAndSpectator();
+
+        SendMessageToClient(ServerToClientSignifiers.GameRoomSpectatorLeft + ",", id);
+    }
+
+
+
+    /// <summary>
+    /// Refresh spectator list
+    /// </summary>
+    void RefreshSpectatorListForPlayerAndSpectator()
+    {
+        string msg = "";
+
+        // create a msg of all spectators
+        for (int i = 0; i < GameRoomSpectatorList.Count; i++)
+        {
+            msg += GameRoomSpectatorList[i].username + ",";
+        }
+
+        Debug.Log("$#################Spectators sent = " + msg);
+
+        // send refresh to all spectators, probably not the one that got added right now..
+        for (int i = 0; i < GameRoomSpectatorList.Count; i++)
+        {
+            SendMessageToClient(ServerToClientSignifiers.PlayerSpectatorRefresh + "," + msg, GameRoomSpectatorList[i].clientID);
+        }
+
+        // send refresh to all gameroom players
+        for (int i = 0; i < GameRoomPlayerList.Count; i++)
+        {
+            SendMessageToClient(ServerToClientSignifiers.PlayerSpectatorRefresh + "," + msg, GameRoomPlayerList[i].clientID);
+        }
     }
 
 
@@ -525,7 +594,14 @@ public class NetworkedServer : MonoBehaviour
     /// </summary>
     void GameRoomSpectatorsRequest(string[] receivedMessageSplit, int id)
     {
+        string msg = "";
 
+        foreach (var playerAccountSpectator in GameRoomSpectatorList)
+        {
+            msg += playerAccountSpectator.username + ",";
+        }
+
+        SendMessageToClient(ServerToClientSignifiers.PlayerSpectatorRefresh + "," + msg, id);
     }
 
 
@@ -537,7 +613,6 @@ public class NetworkedServer : MonoBehaviour
             new Vector2Int(int.Parse(receivedMessageSplit[1]), 
                 int.Parse(receivedMessageSplit[2]));
 
-        //Debug.Log("###########################Player 1 played = " + positionPlayed);
 
         int player2ID = 0;
 
@@ -548,13 +623,19 @@ public class NetworkedServer : MonoBehaviour
                 player2ID = playerAccount.clientID;
             }
         }
-
-        //Debug.Log("###########################Player 1 played = " + player2ID);
-
+        
         string message = "";
 
         message = receivedMessageSplit[1] + "," + receivedMessageSplit[2] + ",";
         SendMessageToClient(ServerToClientSignifiers.Player2TurnReceive + "," + message, player2ID);
+
+        message += "X" + ",";
+
+        // send to spectator also
+        foreach (var spectator in GameRoomSpectatorList)
+        {
+            SendMessageToClient(ServerToClientSignifiers.SpectatorTurnReceive + "," + message, spectator.clientID);
+        }
     }
 
 
@@ -578,6 +659,13 @@ public class NetworkedServer : MonoBehaviour
 
         message = receivedMessageSplit[1] + "," + receivedMessageSplit[2] + ",";
         SendMessageToClient(ServerToClientSignifiers.Player1TurnReceive + "," + message, player1ID);
+
+        message += "O" + ",";
+        // send to spectator also
+        foreach (var spectator in GameRoomSpectatorList)
+        {
+            SendMessageToClient(ServerToClientSignifiers.SpectatorTurnReceive + "," + message, spectator.clientID);
+        }
     }
 
 
@@ -694,6 +782,7 @@ public static class ClientToServerSignifiers
 
     public const int GameRoomPlayersRequest = 30;
     public const int GameRoomSpectatorsRequest = 31;
+    public const int GameRoomSpectatorLeave = 32;
 
     public const int PlayedPlayer1Turn = 100;
     public const int PlayedPlayer2Turn = 101;
@@ -714,10 +803,13 @@ public static class ServerToClientSignifiers
     public const int PlayerJoinGameSendNo = 21;
     public const int PlayerJoinGameSendWaiting = 22;
     public const int PlayerSpectateGameSend = 23;
+    public const int PlayerSpectatorRefresh = 24;
 
     public const int GameRoomPlayersSend = 30;
     public const int GameRoomSpectatorsSend = 31;
+    public const int GameRoomSpectatorLeft = 32;
 
     public const int Player2TurnReceive = 100;
     public const int Player1TurnReceive = 101;
+    public const int SpectatorTurnReceive = 102;
 }
