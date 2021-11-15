@@ -164,6 +164,10 @@ public class NetworkedClient : MonoBehaviour
         {
             LobbySystem.GetInstance().HandleResponseFromServer(msg);
         }
+        else if (GameManager.currentMode == CurrentMode.GameRoom)
+        {
+            GameRoomSystem.GetInstance().HandleResponseFromServer(msg);
+        }
     }
 
     public bool IsConnected()
@@ -187,8 +191,11 @@ public static class ClientToServerSignifiers
     public const int PlayerJoinGameRequest = 20;
     public const int PlayerSpectateGameRequest = 21;
 
-    public const int PlayersInGameRequest = 30;
-    public const int PlayersSpectatingRequest = 31;
+    public const int GameRoomPlayersRequest = 30;
+    public const int GameRoomSpectatorsRequest = 31;
+
+    public const int PlayedPlayer1Turn = 100;
+    public const int PlayedPlayer2Turn = 101;
 }
 
 public static class ServerToClientSignifiers
@@ -207,6 +214,9 @@ public static class ServerToClientSignifiers
     public const int PlayerJoinGameSendWaiting = 22;
     public const int PlayerSpectateGameSend = 23;
 
-    public const int PlayersInGameSend = 30;
-    public const int PlayersSpectatingSend = 31;
+    public const int GameRoomPlayersSend = 30;
+    public const int GameRoomSpectatorsSend = 31;
+
+    public const int Player2TurnReceive = 100;
+    public const int Player1TurnReceive = 101;
 }

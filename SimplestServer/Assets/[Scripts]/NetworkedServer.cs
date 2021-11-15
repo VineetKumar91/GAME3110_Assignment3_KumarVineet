@@ -6,6 +6,7 @@ using UnityEngine.Networking;
 using System.IO;
 using System.Linq;
 using UnityEngine.UI;
+using System;
 
 /// <summary>
 /// 1/11/12
@@ -47,6 +48,7 @@ public class NetworkedServer : MonoBehaviour
     public GameObject userpanelText;
 
     public List<PlayerAccount> GameRoomPlayerList;
+    public List<PlayerAccount> GameRoomSpectatorList;
 
     // Start is called before the first frame update
     void Start()
@@ -81,6 +83,8 @@ public class NetworkedServer : MonoBehaviour
         // create new gameroom player list with capacity 2
         GameRoomPlayerList = new List<PlayerAccount>();
         GameRoomPlayerList.Capacity = 2;
+
+        GameRoomSpectatorList = new List<PlayerAccount>();
     }
 
     // Update is called once per frame
@@ -191,11 +195,28 @@ public class NetworkedServer : MonoBehaviour
                 SpectateGameRequest(receivedMessageSplit, id);
                 break;
 
+            case ClientToServerSignifiers.GameRoomPlayersRequest:
+                GameRoomPlayersRequest(receivedMessageSplit, id);
+                break;
+
+            case ClientToServerSignifiers.GameRoomSpectatorsRequest:
+                GameRoomSpectatorsRequest(receivedMessageSplit, id);
+                break;
+
+
+            case ClientToServerSignifiers.PlayedPlayer1Turn:
+                Player1TurnPlayed(receivedMessageSplit,id);
+                break;
+
+            case ClientToServerSignifiers.PlayedPlayer2Turn:
+                Player2TurnPlayed(receivedMessageSplit, id);
+                break;
+
             default:
                 break;
         }
     }
-
+    
 
     /// <summary>
     /// Create account
@@ -336,7 +357,7 @@ public class NetworkedServer : MonoBehaviour
                 continue;
             }
 
-            message = playerAccount.username + ",";
+            message += playerAccount.username + ",";
         }
 
         SendMessageToClient(ServerToClientSignifiers.PlayerListSend + "," + message, id);
@@ -397,7 +418,7 @@ public class NetworkedServer : MonoBehaviour
 
         foreach (var playerAccount in onlinePlayerAccounts)
         {
-            message = playerAccount.username + ",";
+            message += playerAccount.username + ",";
         }
 
         foreach (var playerAccount in onlinePlayerAccounts)
@@ -414,8 +435,8 @@ public class NetworkedServer : MonoBehaviour
     /// <param name="id"></param>
     void JoinGameRequest(string[] receivedMessageSplit, int id)
     {
-        Debug.Log("ReceivedMessage 0 "+ receivedMessageSplit[0] );
-        Debug.Log("ReceivedMessage 1 "+ receivedMessageSplit[1] );
+        //Debug.Log("ReceivedMessage 0 "+ receivedMessageSplit[0] );
+        //Debug.Log("ReceivedMessage 1 "+ receivedMessageSplit[1] );
         if (GameRoomPlayerList.Count < 2) // Check if game room is available
         {
             PlayerAccount joinPlayerAccount = new PlayerAccount();
@@ -430,8 +451,8 @@ public class NetworkedServer : MonoBehaviour
             GameRoomPlayerList.Add(joinPlayerAccount);
 
             // Test ID
-            Debug.Log("ID Parameter = " + id);
-            Debug.Log("ID from List = " + joinPlayerAccount.clientID);
+            //Debug.Log("ID Parameter = " + id);
+            //Debug.Log("ID from List = " + joinPlayerAccount.clientID);
 
             // If 1, then waiting
             if (GameRoomPlayerList.Count == 1)
@@ -454,10 +475,95 @@ public class NetworkedServer : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Spectate game Request to join the game room as spectator
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
+    /// <param name="id"></param>
     void SpectateGameRequest(string[] receivedMessageSplit, int id)
     {
 
     }
+
+
+    /// <summary>
+    /// Current players in game room
+    /// </summary>
+    void GameRoomPlayersRequest(string[] receivedMessageSplit, int id)
+    {
+        string msg = "";
+
+        foreach (var playerInGameRoom in GameRoomPlayerList.ToList())
+        {
+            msg += playerInGameRoom.username + "," ;
+        }
+
+        SendMessageToClient(ServerToClientSignifiers.GameRoomPlayersSend + "," + msg, id);
+
+        //Debug.Log("WHAT THE FK AM I SENDING count =  " + GameRoomPlayerList.Count + " Content = " + ServerToClientSignifiers.GameRoomPlayersSend + "," + msg);
+    }
+
+    /// <summary>
+    /// Current spectators in game room
+    /// </summary>
+    void GameRoomSpectatorsRequest(string[] receivedMessageSplit, int id)
+    {
+
+    }
+
+
+    // GAME PLAY FUNCTIONS -------
+
+    private void Player1TurnPlayed(string[] receivedMessageSplit, int id)
+    {
+        Vector2Int positionPlayed =
+            new Vector2Int(int.Parse(receivedMessageSplit[1]), 
+                int.Parse(receivedMessageSplit[2]));
+
+        //Debug.Log("###########################Player 1 played = " + positionPlayed);
+
+        int player2ID = 0;
+
+        foreach (var playerAccount in GameRoomPlayerList)
+        {
+            if (playerAccount.clientID != id)
+            {
+                player2ID = playerAccount.clientID;
+            }
+        }
+
+        //Debug.Log("###########################Player 1 played = " + player2ID);
+
+        string message = "";
+
+        message = receivedMessageSplit[1] + "," + receivedMessageSplit[2] + ",";
+        SendMessageToClient(ServerToClientSignifiers.Player2TurnReceive + "," + message, player2ID);
+    }
+
+
+    private void Player2TurnPlayed(string[] receivedMessageSplit, int id)
+    {
+        Vector2Int positionPlayed =
+            new Vector2Int(int.Parse(receivedMessageSplit[1]),
+                int.Parse(receivedMessageSplit[2]));
+
+        int player1ID = 0;
+
+        foreach (var playerAccount in GameRoomPlayerList)
+        {
+            if (playerAccount.clientID != id)
+            {
+                player1ID = playerAccount.clientID;
+            }
+        }
+
+        string message = "";
+
+        message = receivedMessageSplit[1] + "," + receivedMessageSplit[2] + ",";
+        SendMessageToClient(ServerToClientSignifiers.Player1TurnReceive + "," + message, player1ID);
+    }
+
+
 
     /// <summary>
     /// Debug purposes function
@@ -568,8 +674,13 @@ public static class ClientToServerSignifiers
 
     public const int PlayerJoinGameRequest = 20;
     public const int PlayerSpectateGameRequest = 21;
-}
 
+    public const int GameRoomPlayersRequest = 30;
+    public const int GameRoomSpectatorsRequest = 31;
+
+    public const int PlayedPlayer1Turn = 100;
+    public const int PlayedPlayer2Turn = 101;
+}
 
 public static class ServerToClientSignifiers
 {
@@ -586,4 +697,10 @@ public static class ServerToClientSignifiers
     public const int PlayerJoinGameSendNo = 21;
     public const int PlayerJoinGameSendWaiting = 22;
     public const int PlayerSpectateGameSend = 23;
+
+    public const int GameRoomPlayersSend = 30;
+    public const int GameRoomSpectatorsSend = 31;
+
+    public const int Player2TurnReceive = 100;
+    public const int Player1TurnReceive = 101;
 }

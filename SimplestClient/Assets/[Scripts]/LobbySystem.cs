@@ -121,11 +121,11 @@ public class LobbySystem : MonoBehaviour
         }
         else if (signifer == ServerToClientSignifiers.PlayerJoinGameSendYes)
         {
-            //GameManager.GetInstance().ChangeMode(CurrentMode.GameRoom);
+            GameManager.GetInstance().ChangeMode(CurrentMode.GameRoom);
         }
         else if (signifer == ServerToClientSignifiers.PlayerJoinGameSendNo)
         {
-
+            JoinGameStatus.text = "Match in Progress, can Spectate";
         }
         else if (signifer == ServerToClientSignifiers.PlayerSpectateGameSend)
         {
