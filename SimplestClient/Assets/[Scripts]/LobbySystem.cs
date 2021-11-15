@@ -38,6 +38,8 @@ public class LobbySystem : MonoBehaviour
     [SerializeField]
     private Text JoinGameStatus;
 
+    private bool isRequestAlreadySent = false;
+
 
 
     // reference to login instance
@@ -223,10 +225,12 @@ public class LobbySystem : MonoBehaviour
     {
         string message = "";
 
-        if (networkedClient.IsConnected())
+        if (networkedClient.IsConnected() && !isRequestAlreadySent)
         {
+            Debug.Log("Request Sent Once");
+            isRequestAlreadySent = true;
             message = ClientToServerSignifiers.PlayerJoinGameRequest + "," + GameManager.currentUsername;
-            networkedClient.SendMessageToHost(message); 
+            networkedClient.SendMessageToHost(message);
         }
     }
 

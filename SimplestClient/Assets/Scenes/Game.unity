@@ -2517,7 +2517,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 495365701}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1702362377}
+        m_TargetAssemblyTypeName: GameRoomSystem, Assembly-CSharp
+        m_MethodName: Button_ActivateReplay
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 1
 --- !u!114 &495365701
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2941,6 +2953,54 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 553771446}
   m_CullTransparentMesh: 1
+--- !u!1 &555796590
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 555796591}
+  - component: {fileID: 555796592}
+  m_Layer: 0
+  m_Name: ReplaySystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &555796591
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 555796590}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1218447920}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &555796592
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 555796590}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dc2a64f19f0a194ea375c0fa7231210, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &558085290
 GameObject:
   m_ObjectHideFlags: 0
@@ -4737,6 +4797,7 @@ RectTransform:
   - {fileID: 48150608}
   - {fileID: 1699415649}
   - {fileID: 495365699}
+  - {fileID: 555796591}
   m_Father: {fileID: 1702362376}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -6612,12 +6673,20 @@ MonoBehaviour:
   player2: 2
   player1Symbol: X
   player2Symbol: O
+  movesDone: 0
+  isPlayer1Turn: 0
   isPlayer1: 0
   isMatchActive: 0
+  winningPlayer: 0
+  currentTurn: {fileID: 783726077}
+  PresetMessagePlayer1: {fileID: 1691435775}
+  PresetMessagePlayer2: {fileID: 1023856054}
   AllButtons: []
   TicTacToeObject: {fileID: 1027282052}
   buttonPrefab: {fileID: 2731519382090219631, guid: 049c307000d403244b1651d5c8d0055d, type: 3}
   networkedClient: {fileID: 498408314}
+  replaySystemRef: {fileID: 555796592}
+  isReplayOn: 0
 --- !u!1 &1749683864
 GameObject:
   m_ObjectHideFlags: 0
