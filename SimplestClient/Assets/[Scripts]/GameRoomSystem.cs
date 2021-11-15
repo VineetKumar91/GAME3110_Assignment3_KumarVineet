@@ -197,6 +197,10 @@ public class GameRoomSystem : MonoBehaviour
         {
             PlayerSpectatorRefresh(receivedMessageSplit);
         }
+        else if (signifer == ServerToClientSignifiers.SpectatorMovesHistoryReceive)
+        {
+            SpectatorMovesHistoryReceive(receivedMessageSplit);
+        }
         else if (signifer == ServerToClientSignifiers.GameRoomSpectatorLeft)
         {
             SpectatorIsLeavingNow(receivedMessageSplit);
@@ -207,7 +211,37 @@ public class GameRoomSystem : MonoBehaviour
         }
     }
 
-   
+    /// <summary>
+    /// Receive Move history
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
+    private void SpectatorMovesHistoryReceive(string[] receivedMessageSplit)
+    {
+        Vector2Int positionPlayed = new Vector2Int();
+        int player = 0;
+        string symbol = "A";
+
+        for (int i = 1; i < receivedMessageSplit.Length; i += 3)
+        {
+            positionPlayed.x = int.Parse(receivedMessageSplit[i]);
+            positionPlayed.y = int.Parse(receivedMessageSplit[i+1]);
+            player = int.Parse(receivedMessageSplit[i+2]);
+
+            if (player == 1)
+            {
+                symbol = "X";
+            }
+            else
+            {
+                symbol = "O";
+            }
+
+            int index = 3 * positionPlayed.x + positionPlayed.y;
+            AllButtons[index].GetComponentInChildren<Text>().text = symbol;
+        }
+    }
+
+
     /// <summary>
     /// Spectator has to be removed from game room list
     /// </summary>

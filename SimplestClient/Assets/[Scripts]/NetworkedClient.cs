@@ -223,4 +223,5 @@ public static class ServerToClientSignifiers
     public const int Player2TurnReceive = 100;
     public const int Player1TurnReceive = 101;
     public const int SpectatorTurnReceive = 102;
+    public const int SpectatorMovesHistoryReceive = 103;
 }

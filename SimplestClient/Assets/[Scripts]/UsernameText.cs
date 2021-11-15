@@ -33,7 +33,7 @@ public class UsernameText : MonoBehaviour
             }
 
             child.gameObject.GetComponent<UsernameText>().isSelected = false;
-            child.gameObject.GetComponent<UsernameText>().textComponent.color = Color.black;
+            child.gameObject.GetComponent<UsernameText>().textComponent.color = Color.yellow;
         }
 
         if (!isSelected)
@@ -45,7 +45,7 @@ public class UsernameText : MonoBehaviour
         }
         else
         {
-            textComponent.color = Color.black;
+            textComponent.color = Color.yellow;
             isSelected = false;
             LobbySystem.GetInstance().PMUser = "";
             LobbySystem.GetInstance().isPMUserSelected = false;

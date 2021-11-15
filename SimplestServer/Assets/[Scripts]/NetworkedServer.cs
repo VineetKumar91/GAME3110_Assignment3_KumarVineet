@@ -49,6 +49,7 @@ public class NetworkedServer : MonoBehaviour
 
     public List<PlayerAccount> GameRoomPlayerList;
     public List<PlayerAccount> GameRoomSpectatorList;
+    public List<MovesOrderClass> MovesOrderList;
 
     // Start is called before the first frame update
     void Start()
@@ -85,6 +86,8 @@ public class NetworkedServer : MonoBehaviour
         GameRoomPlayerList.Capacity = 2;
 
         GameRoomSpectatorList = new List<PlayerAccount>();
+
+        MovesOrderList = new List<MovesOrderClass>();
     }
 
     // Update is called once per frame
@@ -516,9 +519,30 @@ public class NetworkedServer : MonoBehaviour
             SendMessageToClient(ServerToClientSignifiers.PlayerSpectateGameSend + ",", id);
         }
 
+        if (MovesOrderList.Count > 0)
+        {
+            SendSpectatorMovesHistory(id);
+        }
 
         RefreshSpectatorListForPlayerAndSpectator();
 
+    }
+
+    /// <summary>
+    /// Send move history to the new spectator
+    /// </summary>
+    /// <param name="id"></param>
+    private void SendSpectatorMovesHistory(int id)
+    {
+        string msg = "";
+
+        foreach (var moves in MovesOrderList)
+        {
+            msg += moves.moveLocation.x + "," + moves.moveLocation.y + "," + moves.player + ",";
+        }
+
+        // Send message to client
+        SendMessageToClient(ServerToClientSignifiers.SpectatorMovesHistoryReceive + "," + msg, id);
     }
 
 
@@ -606,7 +630,11 @@ public class NetworkedServer : MonoBehaviour
 
 
     // GAME PLAY FUNCTIONS -------
-
+    /// <summary>
+    /// Move done by player 1
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
+    /// <param name="id"></param>
     private void Player1TurnPlayed(string[] receivedMessageSplit, int id)
     {
         Vector2Int positionPlayed =
@@ -623,6 +651,10 @@ public class NetworkedServer : MonoBehaviour
                 player2ID = playerAccount.clientID;
             }
         }
+
+        // Store moves in server too now
+        MovesOrderClass move = new MovesOrderClass(positionPlayed,1);
+        MovesOrderList.Add(move);
         
         string message = "";
 
@@ -639,6 +671,11 @@ public class NetworkedServer : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Move done by player 2
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
+    /// <param name="id"></param>
     private void Player2TurnPlayed(string[] receivedMessageSplit, int id)
     {
         Vector2Int positionPlayed =
@@ -654,6 +691,10 @@ public class NetworkedServer : MonoBehaviour
                 player1ID = playerAccount.clientID;
             }
         }
+
+        // Store moves in server too now
+        MovesOrderClass move = new MovesOrderClass(positionPlayed, 2);
+        MovesOrderList.Add(move);
 
         string message = "";
 
@@ -745,7 +786,21 @@ public class NetworkedServer : MonoBehaviour
     }
 }
 
+// Moves order class for keeping track of moves done by whom
+public class MovesOrderClass
+{
+    public Vector2Int moveLocation;
+    public int player;
 
+    public MovesOrderClass()
+    { }
+
+    public MovesOrderClass(Vector2Int mL, int Player)
+    {
+        moveLocation = mL;
+        player = Player;
+    }
+}
 
 
 
@@ -812,4 +867,5 @@ public static class ServerToClientSignifiers
     public const int Player2TurnReceive = 100;
     public const int Player1TurnReceive = 101;
     public const int SpectatorTurnReceive = 102;
+    public const int SpectatorMovesHistoryReceive = 103;
 }
