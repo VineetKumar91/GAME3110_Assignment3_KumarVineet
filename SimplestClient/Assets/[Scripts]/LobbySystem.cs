@@ -131,7 +131,7 @@ public class LobbySystem : MonoBehaviour
         }
         else if (signifer == ServerToClientSignifiers.PlayerSpectateGameSend)
         {
-
+            GameManager.GetInstance().ChangeMode(CurrentMode.GameRoom);
         }
     }
 

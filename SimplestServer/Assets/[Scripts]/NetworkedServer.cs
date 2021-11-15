@@ -482,7 +482,24 @@ public class NetworkedServer : MonoBehaviour
     /// <param name="id"></param>
     void SpectateGameRequest(string[] receivedMessageSplit, int id)
     {
+        PlayerAccount spectatorRequestAcc = new PlayerAccount();
+        foreach (var playerAccount in onlinePlayerAccounts)
+        {
+            if (playerAccount.username.Equals(receivedMessageSplit[1]))
+            {
+                spectatorRequestAcc = playerAccount;
+                break;
+            }
+        }
 
+        // Add it to the spectator list
+        GameRoomSpectatorList.Add(spectatorRequestAcc);
+
+        // Match is already ongoing
+        if (GameRoomPlayerList.Count >= 2)
+        {
+            SendMessageToClient(ServerToClientSignifiers.PlayerSpectateGameSend + ",", id);
+        }
     }
 
 

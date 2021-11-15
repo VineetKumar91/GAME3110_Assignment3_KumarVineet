@@ -16,7 +16,6 @@ public class GameRoomSystem : MonoBehaviour
     [Header("Player Turns")]
     // Win Condition elements
     public int player1 = 1;
-
     public int player2 = 2;
     public string player1Symbol = "X";
     public string player2Symbol = "O";
@@ -79,7 +78,7 @@ public class GameRoomSystem : MonoBehaviour
     {
         // Send request to ask for players in the game
         RequestPlayerList();
-        //RequestSpectatorList();
+        RequestSpectatorList();
 
         if (AllButtons == null)
         {
@@ -131,7 +130,7 @@ public class GameRoomSystem : MonoBehaviour
         }
         else if (signifer == ServerToClientSignifiers.GameRoomSpectatorsSend)
         {
-
+            GameRoomSpectatorsSend(receivedMessageSplit);
         }
         else if (signifer == ServerToClientSignifiers.Player1TurnReceive)
         {
@@ -143,6 +142,19 @@ public class GameRoomSystem : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Spectator List Send
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
+    private void GameRoomSpectatorsSend(string[] receivedMessageSplit)
+    {
+        for (int i = 1; i < receivedMessageSplit.Length; i++)
+        {
+            spectatorList.Add(receivedMessageSplit[i]);
+        }
+
+        //TODO: Spectator Mode, Prefixed Message
+    }
 
 
     /// <summary>
@@ -347,7 +359,7 @@ public class GameRoomSystem : MonoBehaviour
         ReplaySystem.MovesOrderClass movesOrderTemp = new ReplaySystem.MovesOrderClass();
         while (ReplaySystem.GetInstance().movesOrder.Count > 0)
         {
-            yield return new WaitForSeconds(2f);
+            yield return new WaitForSeconds(1f);
 
             // Formula to convert from 3x3 matrix of Vector2Int (x,y) to List index
             // 3x + y
@@ -436,6 +448,8 @@ public class GameRoomSystem : MonoBehaviour
     public void RequestSpectatorList()
     {
         string message = "";
+
+        message = ClientToServerSignifiers.GameRoomSpectatorsRequest + ",";
 
         if (networkedClient.IsConnected())
         {
