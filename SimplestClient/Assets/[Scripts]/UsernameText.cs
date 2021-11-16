@@ -36,7 +36,7 @@ public class UsernameText : MonoBehaviour
             child.gameObject.GetComponent<UsernameText>().textComponent.color = Color.yellow;
         }
 
-        if (!isSelected)
+        if (!isSelected && textComponent.text != GameManager.currentUsername)
         {
             textComponent.color = new Color(1f, 0.6f, 1f, 1f);
             isSelected = true;

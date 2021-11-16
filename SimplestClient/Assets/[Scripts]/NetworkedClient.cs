@@ -198,6 +198,9 @@ public static class ClientToServerSignifiers
 
     public const int PrefixedMessageSent = 40;
 
+    public const int LobbySendGlobalMessage = 50;
+    public const int LobbySendPersonalMessage = 51;
+
     public const int PlayedPlayer1Turn = 100;
     public const int PlayedPlayer2Turn = 101;
 
@@ -228,9 +231,13 @@ public static class ServerToClientSignifiers
 
     public const int PrefixedMessageReceived = 40;
 
+    public const int LobbyReceiveGlobalMessage = 50;
+    public const int LobbyReceivePersonalMessage = 51;
+
     public const int Player2TurnReceive = 100;
     public const int Player1TurnReceive = 101;
     public const int SpectatorTurnReceive = 102;
     public const int SpectatorMovesHistoryReceive = 103;
     public const int SpectatorAnnounceWinner = 104;
+
 }

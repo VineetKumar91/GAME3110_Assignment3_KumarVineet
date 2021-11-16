@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,8 +19,8 @@ public class LobbySystem : MonoBehaviour
     Text loadingText;
 
 
-    [Header("Chat System")]
-    [SerializeField] 
+    [Header("Chat System")] 
+    [SerializeField]
     private List<Message> messagesList;
     public GameObject ChatPanel_ScrollView;
     public GameObject TextObject;
@@ -74,15 +75,16 @@ public class LobbySystem : MonoBehaviour
         StartCoroutine("DelayedUpdate");
     }
 
+
+    // Set username when enabled
+    private void OnEnable()
+    {
+    }
+
     // Update is called once per frame
     void Update()
     {
-        // TODO: PM CHAT COMPLETION
-        // TODO: GENERAL CHAT COMPLETION
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            GetPMPlayer();
-        }
+       
     }
 
     /// <summary>
@@ -135,6 +137,14 @@ public class LobbySystem : MonoBehaviour
             GameManager.GetInstance().ChangeMode(CurrentMode.GameRoom);
             JoinGameStatus.text = "";
         }
+        else if (signifer == ServerToClientSignifiers.LobbyReceiveGlobalMessage)
+        {
+            LobbyReceiveGlobalMessage(receivedMessageSplit);
+        }
+        else if (signifer == ServerToClientSignifiers.LobbyReceivePersonalMessage)
+        {
+            LobbyReceivePersonalMessage( receivedMessageSplit);
+        }
     }
 
     /// <summary>
@@ -172,11 +182,16 @@ public class LobbySystem : MonoBehaviour
             }
        }
 
-       // Load that UI Panel with updated player list
+        // Load that UI Panel with updated player list
+        int firstUserName = 0;
         foreach (var username in playerNameList)
         {
             GameObject usernameText = Instantiate(UsernameTextObject, UsersPanel.transform);
             usernameText.GetComponent<Text>().text = username;
+           //if (firstUserName == 0)
+           //{
+           //    usernameText.GetComponent<Text>().color = Color.green;
+           //}
             Debug.Log("Usernames:" + username);
         }
     }
@@ -209,11 +224,19 @@ public class LobbySystem : MonoBehaviour
             }
         }
 
+        int firstUserName = 0;
         // Load that UI Panel with updated player list
         foreach (var username in playerNameList)
         {
             GameObject usernameText = Instantiate(UsernameTextObject, UsersPanel.transform);
             usernameText.GetComponent<Text>().text = username;
+            //if (firstUserName == 0)
+            //{
+            //    usernameText.GetComponent<Text>().color = Color.green;
+            //}
+
+            firstUserName++;
+            
             Debug.Log("RefreshUsernames:" + username);
         }
     }
@@ -266,17 +289,15 @@ public class LobbySystem : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Send message
-    /// 1. Create locally first
-    /// @TODO Do Server next
-    /// </summary>
-    /// <param name="text"></param>
-    public void SendMessageToChat(string text)
+    // Receive Messages
+    private void LobbyReceivePersonalMessage(string[] receivedMessageSplit)
     {
+        string message = receivedMessageSplit[1];
+
         // Create the message and set its text
         Message msg = new Message();
-        msg.text = text;
+
+        msg.text = message;
 
         // Instantiate the text game object to the scroll view
         GameObject textPrefab = Instantiate(TextObject, ChatPanel_ScrollView.transform);
@@ -287,7 +308,91 @@ public class LobbySystem : MonoBehaviour
         // set the textUI's textObject text to text version here.
         msg.textObject.text = msg.text;
 
+        msg.textObject.color = new Color(1f, 0.6f, 1f, 1f);
+
         messagesList.Add(msg);
+    }
+
+    private void LobbyReceiveGlobalMessage(string[] receivedMessageSplit)
+    {
+        string message = receivedMessageSplit[1];
+
+        // Create the message and set its text
+        Message msg = new Message();
+
+        msg.text = message;
+
+        // Instantiate the text game object to the scroll view
+        GameObject textPrefab = Instantiate(TextObject, ChatPanel_ScrollView.transform);
+
+        // get the textPrefab's text component and set it to the list
+        msg.textObject = textPrefab.GetComponent<Text>();
+
+        // set the textUI's textObject text to text version here.
+        msg.textObject.text = msg.text;
+
+        msg.textObject.color = Color.black;
+
+        messagesList.Add(msg);
+
+    }
+
+    /// <summary>
+    /// Send message
+    /// 1. Create locally first
+    /// @TODO Do Server next
+    /// </summary>
+    /// <param name="text"></param>
+    public void SendMessageToChat(string text, string username)
+    {
+        // Create the message and set its text
+        Message msg = new Message();
+
+        msg.text += text;
+
+        if (isPMUserSelected)
+        {
+            // Instantiate the text game object to the scroll view
+            GameObject textPrefab = Instantiate(TextObject, ChatPanel_ScrollView.transform);
+
+            // get the textPrefab's text component and set it to the list
+            msg.textObject = textPrefab.GetComponent<Text>();
+
+            // set the textUI's textObject text to text version here.
+            msg.textObject.text = "To " + PMUser + ": " + msg.text;
+
+            msg.textObject.color = new Color(1f, 0.6f, 1f, 1f);
+            
+            string message = "";
+
+            message += PMUser + "," + text;
+
+            networkedClient.SendMessageToHost(ClientToServerSignifiers.LobbySendPersonalMessage + "," + message);
+            
+            messagesList.Add(msg);
+        }
+        else
+        {
+            // Instantiate the text game object to the scroll view
+            GameObject textPrefab = Instantiate(TextObject, ChatPanel_ScrollView.transform);
+
+            // get the textPrefab's text component and set it to the list
+            msg.textObject = textPrefab.GetComponent<Text>();
+
+            // set the textUI's textObject text to text version here.
+            msg.textObject.text = GameManager.currentUsername + ": " + msg.text;
+
+            msg.textObject.color = Color.black;
+            
+            string message = "";
+
+            message += msg.text;
+
+            networkedClient.SendMessageToHost(ClientToServerSignifiers.LobbySendGlobalMessage + "," + message);
+            
+            messagesList.Add(msg);
+        }
+
     }
 
     /// <summary>
@@ -295,11 +400,14 @@ public class LobbySystem : MonoBehaviour
     /// </summary>
     public void Button_SendMessage()
     {
+
+        bool isSending = true;
+
         // If empty, do nothing
         if (ChatInputField.text != "")
         {
             // send the text to chat
-            SendMessageToChat(ChatInputField.text);
+            SendMessageToChat(ChatInputField.text,  GameManager.currentUsername);
 
             // empty the chat input field
             ChatInputField.text = "";

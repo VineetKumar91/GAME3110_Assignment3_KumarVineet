@@ -231,12 +231,18 @@ public class NetworkedServer : MonoBehaviour
                 PrefixedMessageSent(receivedMessageSplit, id);
                 break;
 
+            case ClientToServerSignifiers.LobbySendGlobalMessage:
+                LobbySendGlobalMessage(receivedMessageSplit, id);
+                break;
+
+            case ClientToServerSignifiers.LobbySendPersonalMessage:
+                LobbySendPersonalMessage(receivedMessageSplit, id);
+                break;
+
             default:
                 break;
         }
     }
-
-
 
     /// <summary>
     /// Create account
@@ -817,6 +823,55 @@ public class NetworkedServer : MonoBehaviour
     }
 
 
+    // Lobby Messages
+    private void LobbySendPersonalMessage(string[] receivedMessageSplit, int id)
+    {
+        string PMUser = receivedMessageSplit[1];
+        string message = "";
+
+
+        foreach (var playerAccount in onlinePlayerAccounts)
+        {
+            if (playerAccount.clientID == id)
+            {
+                message += "From " + playerAccount.username + ": " + receivedMessageSplit[1];
+            }
+        }
+
+        foreach (var playerAccount in onlinePlayerAccounts)
+        {
+            if (playerAccount.username.Equals(PMUser))
+            {
+                SendMessageToClient(ServerToClientSignifiers.LobbyReceivePersonalMessage + "," + message, playerAccount.clientID);
+                break;
+            }
+        }
+
+    }
+
+    private void LobbySendGlobalMessage(string[] receivedMessageSplit, int id)
+    {
+        string message = "";
+
+        foreach (var playerAccount in onlinePlayerAccounts)
+        {
+            if (playerAccount.clientID == id)
+            {
+                message += playerAccount.username + ": " + receivedMessageSplit[1];
+            }
+        }
+
+        foreach (var playerAccount in onlinePlayerAccounts)
+        {
+            if (playerAccount.clientID != id)
+            {
+                SendMessageToClient(ServerToClientSignifiers.LobbyReceiveGlobalMessage + "," + message, playerAccount.clientID);
+            }
+        }
+
+    }
+
+
     /// <summary>
     /// Debug purposes function
     /// </summary>
@@ -948,6 +1003,9 @@ public static class ClientToServerSignifiers
 
     public const int PrefixedMessageSent = 40;
 
+    public const int LobbySendGlobalMessage = 50;
+    public const int LobbySendPersonalMessage = 51;
+
     public const int PlayedPlayer1Turn = 100;
     public const int PlayedPlayer2Turn = 101;
 
@@ -977,6 +1035,9 @@ public static class ServerToClientSignifiers
     public const int GameRoomPlayerLeft = 33;
 
     public const int PrefixedMessageReceived = 40;
+
+    public const int LobbyReceiveGlobalMessage = 50;
+    public const int LobbyReceivePersonalMessage = 51;
 
     public const int Player2TurnReceive = 100;
     public const int Player1TurnReceive = 101;
