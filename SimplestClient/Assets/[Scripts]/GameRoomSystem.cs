@@ -78,12 +78,18 @@ public class GameRoomSystem : MonoBehaviour
     [Header("Exit Game Room")] 
     public Text exitGameRoom;
 
-    [Header("Prefixed Messages")] 
+    [Header("Prefixed Messages")]
     [SerializeField]
     private Text Player1TextField;
 
     [SerializeField]
     private Text Player2TextField;
+
+    public bool isVisible1 = false;
+    public bool isVisible2 = false;
+
+    public float timerStart = 0;
+    public float duration = 4;
 
     public static GameRoomSystem GetInstance()
     {
@@ -178,10 +184,7 @@ public class GameRoomSystem : MonoBehaviour
         }
     }
 
-    void Update()
-    {
 
-    }
 
     /// <summary>
     /// Handle response from server
@@ -231,6 +234,58 @@ public class GameRoomSystem : MonoBehaviour
         else if (signifer == ServerToClientSignifiers.GameRoomPlayerLeft)
         {
             GameRoomPlayerLeft(receivedMessageSplit);
+        }
+        else if (signifer == ServerToClientSignifiers.PrefixedMessageReceived)
+        {
+            PrefixedMessageReceived(receivedMessageSplit);
+        }
+    }
+
+
+    /// <summary>
+    /// Receive prefixed messages
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
+    private void PrefixedMessageReceived(string[] receivedMessageSplit)
+    {
+        int playerNumber = int.Parse(receivedMessageSplit[1]);
+        string message = receivedMessageSplit[2];
+
+        if (playerNumber == 1)
+        {
+            Player1TextField.text = message;
+            isVisible1 = true;
+            timerStart = Time.time;
+        }
+        else if (playerNumber == 2)
+        {
+            Player2TextField.text = message;
+            isVisible2 = true;
+            timerStart = Time.time;
+        }
+    }
+
+    /// <summary>
+    /// Fixed update for using manual timer
+    /// </summary>
+    private void FixedUpdate()
+    {
+        if (isVisible1)
+        {
+            if (Time.time - timerStart >= 4f)
+            {
+                Player1TextField.text = "";
+                isVisible1 = false;
+            }
+        }
+
+        if (isVisible2)
+        {
+            if (Time.time - timerStart >= 4f)
+            {
+                Player2TextField.text = "";
+                isVisible2 = false;
+            }
         }
     }
 
@@ -609,6 +664,27 @@ public class GameRoomSystem : MonoBehaviour
 
 
     /// <summary>
+    /// Send Prefixed Message
+    /// </summary>
+    /// <param name="prefixedMessage"></param>
+    public void SendPrefixedMessage(string prefixedMessage)
+    {
+        string msg = "";
+
+        if (isPlayer1)
+        {
+            msg += "1" + "," + prefixedMessage;
+        }
+        else
+        {
+            msg += "2" + "," + prefixedMessage;
+        }
+
+        networkedClient.SendMessageToHost(ClientToServerSignifiers.PrefixedMessageSent + "," + msg);
+    }
+
+
+    /// <summary>
     /// Activate Replay
     /// </summary>
     public void Button_ActivateReplay()
@@ -760,7 +836,6 @@ public class GameRoomSystem : MonoBehaviour
                 button.interactable = false;
             }
         }
-
     }
 
 

@@ -196,6 +196,8 @@ public static class ClientToServerSignifiers
     public const int GameRoomSpectatorLeave = 32;
     public const int GameRoomPlayerLeave = 33;
 
+    public const int PrefixedMessageSent = 40;
+
     public const int PlayedPlayer1Turn = 100;
     public const int PlayedPlayer2Turn = 101;
 
@@ -223,6 +225,8 @@ public static class ServerToClientSignifiers
     public const int GameRoomSpectatorsSend = 31;
     public const int GameRoomSpectatorLeft = 32;
     public const int GameRoomPlayerLeft = 33;
+
+    public const int PrefixedMessageReceived = 40;
 
     public const int Player2TurnReceive = 100;
     public const int Player1TurnReceive = 101;

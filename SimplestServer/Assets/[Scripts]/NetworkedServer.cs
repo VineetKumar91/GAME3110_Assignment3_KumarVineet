@@ -227,11 +227,14 @@ public class NetworkedServer : MonoBehaviour
                 GameRoomPlayerLeave(receivedMessageSplit, id);
                 break;
 
+            case ClientToServerSignifiers.PrefixedMessageSent:
+                PrefixedMessageSent(receivedMessageSplit, id);
+                break;
+
             default:
                 break;
         }
     }
-
 
 
 
@@ -636,8 +639,6 @@ public class NetworkedServer : MonoBehaviour
             msg += GameRoomSpectatorList[i].username + ",";
         }
 
-        Debug.Log("$#################Spectators sent = " + msg);
-
         // send refresh to all spectators, probably not the one that got added right now..
         for (int i = 0; i < GameRoomSpectatorList.Count; i++)
         {
@@ -765,6 +766,36 @@ public class NetworkedServer : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handle Prefixed Message
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
+    /// <param name="id"></param>
+    private void PrefixedMessageSent(string[] receivedMessageSplit, int id)
+    {
+        string msg = "";
+        
+        // 1 is the player id, 2 is the message
+        msg += receivedMessageSplit[1] + "," + receivedMessageSplit[2];
+
+        foreach (var playerAccount in GameRoomPlayerList)
+        {
+            if (playerAccount.clientID != id)
+            {
+                SendMessageToClient(ServerToClientSignifiers.PrefixedMessageReceived + "," + msg, playerAccount.clientID);
+            }
+        }
+
+
+        // putting condition just for safety
+        foreach (var playerAccount in GameRoomSpectatorList)
+        {
+            if (playerAccount.clientID != id)
+            {
+                SendMessageToClient(ServerToClientSignifiers.PrefixedMessageReceived + "," + msg, playerAccount.clientID);
+            }
+        }
+    }
 
 
     /// <summary>
@@ -915,6 +946,8 @@ public static class ClientToServerSignifiers
     public const int GameRoomSpectatorLeave = 32;
     public const int GameRoomPlayerLeave = 33;
 
+    public const int PrefixedMessageSent = 40;
+
     public const int PlayedPlayer1Turn = 100;
     public const int PlayedPlayer2Turn = 101;
 
@@ -942,6 +975,8 @@ public static class ServerToClientSignifiers
     public const int GameRoomSpectatorsSend = 31;
     public const int GameRoomSpectatorLeft = 32;
     public const int GameRoomPlayerLeft = 33;
+
+    public const int PrefixedMessageReceived = 40;
 
     public const int Player2TurnReceive = 100;
     public const int Player1TurnReceive = 101;
