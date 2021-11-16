@@ -14,6 +14,11 @@ public class GameRoomSystem : MonoBehaviour
     private List<string> playerList;
     private List<string> spectatorList;
 
+    [Header("Player")] 
+    [SerializeField] 
+    private Text playerName;
+
+
     [Header("Player Turns")]
     // Win Condition elements
     public int player1 = 1;
@@ -97,6 +102,8 @@ public class GameRoomSystem : MonoBehaviour
         TicTacToeGame = new int[3, 3];
 
         isReplayOn = false;
+
+        playerName.text = GameManager.currentUsername;
     }
 
 
@@ -209,6 +216,16 @@ public class GameRoomSystem : MonoBehaviour
         {
             SpectatorTurnReceive(receivedMessageSplit);
         }
+        else if (signifer == ServerToClientSignifiers.SpectatorAnnounceWinner)
+        {
+            SpectatorAnnounceWinner(receivedMessageSplit);
+        }
+    }
+
+    private void SpectatorAnnounceWinner(string[] receivedMessageSplit)
+    {
+        Debug.Log(receivedMessageSplit[1]);
+        currentTurn.text = receivedMessageSplit[1] + " has won.";
     }
 
     /// <summary>
@@ -570,6 +587,10 @@ public class GameRoomSystem : MonoBehaviour
         {
             FinishGameFirst.gameObject.SetActive(true);
         }
+        else if (!isMatchActive && isPlayer)
+        {
+            // Leave room
+        }
         else if (isMatchActive && !isPlayer)
         {
             string msg = "";
@@ -645,7 +666,13 @@ public class GameRoomSystem : MonoBehaviour
             Debug.Log("Player 1 Won");
             winningPlayer = 1;
             isMatchActive = false;
-            currentTurn.text = "Player 1 has Won";
+            currentTurn.text = playerList[0] + " has Won";
+
+            string msg = "";
+
+            msg = playerList[0] + ",";
+
+            networkedClient.SendMessageToHost(ClientToServerSignifiers.SpectatorAnnounceWinner + "," + msg);
         }
         else if (
             //horizontals
@@ -666,7 +693,13 @@ public class GameRoomSystem : MonoBehaviour
             Debug.Log("Player 2 Won");
             winningPlayer = 2;
             isMatchActive = false;
-            currentTurn.text = "Player 2 has Won";
+            currentTurn.text = playerList[1] + " has Won";
+
+            string msg = "";
+
+            msg = playerList[1] + ",";
+
+            networkedClient.SendMessageToHost(ClientToServerSignifiers.SpectatorAnnounceWinner + "," + msg);
         }
 
         // If match is inactive, deactivate all buttons

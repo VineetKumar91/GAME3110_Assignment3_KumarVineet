@@ -219,12 +219,16 @@ public class NetworkedServer : MonoBehaviour
                 Player2TurnPlayed(receivedMessageSplit, id);
                 break;
 
+            case ClientToServerSignifiers.SpectatorAnnounceWinner:
+                SpectatorAnnounceWinner(receivedMessageSplit, id);
+                break;
+
             default:
                 break;
         }
     }
 
-   
+
 
     /// <summary>
     /// Create account
@@ -424,6 +428,9 @@ public class NetworkedServer : MonoBehaviour
 
         // Refresh Client side list
         RefreshClientPlayerUIList();
+
+        // Refresh Spectator List
+        RefreshSpectatorListForPlayerAndSpectator();
     }
 
     /// <summary>
@@ -466,6 +473,7 @@ public class NetworkedServer : MonoBehaviour
                     break;
                 }
             }
+
             GameRoomPlayerList.Add(joinPlayerAccount);
 
             // Test ID
@@ -507,6 +515,14 @@ public class NetworkedServer : MonoBehaviour
             {
                 spectatorRequestAcc = playerAccount;
                 break;
+            }
+        }
+
+        foreach (var playerAcc in GameRoomSpectatorList)
+        {
+            if (playerAcc.username.Equals(receivedMessageSplit[1]))
+            {
+                return;
             }
         }
 
@@ -712,6 +728,22 @@ public class NetworkedServer : MonoBehaviour
 
 
     /// <summary>
+    /// Announce winner to spectator(s)
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
+    /// <param name="id"></param>
+    private void SpectatorAnnounceWinner(string[] receivedMessageSplit, int id)
+    {
+        string winner = receivedMessageSplit[1];
+
+        foreach (var spectator in GameRoomSpectatorList)
+        {
+            SendMessageToClient(ServerToClientSignifiers.SpectatorAnnounceWinner + "," + winner, spectator.clientID);
+        }
+    }
+
+
+    /// <summary>
     /// Debug purposes function
     /// </summary>
     private void DebugPurposes_DisplayOnlinePlayerAccounts()
@@ -841,6 +873,8 @@ public static class ClientToServerSignifiers
 
     public const int PlayedPlayer1Turn = 100;
     public const int PlayedPlayer2Turn = 101;
+
+    public const int SpectatorAnnounceWinner = 104;
 }
 
 public static class ServerToClientSignifiers
@@ -868,4 +902,5 @@ public static class ServerToClientSignifiers
     public const int Player1TurnReceive = 101;
     public const int SpectatorTurnReceive = 102;
     public const int SpectatorMovesHistoryReceive = 103;
+    public const int SpectatorAnnounceWinner = 104;
 }

@@ -241,8 +241,9 @@ public class LobbySystem : MonoBehaviour
     {
         string message = "";
 
-        if (networkedClient.IsConnected())
+        if (networkedClient.IsConnected() && !isRequestAlreadySent)
         {
+            isRequestAlreadySent = true;
             message = ClientToServerSignifiers.PlayerSpectateGameRequest + "," + GameManager.currentUsername;
             networkedClient.SendMessageToHost(message);
         }

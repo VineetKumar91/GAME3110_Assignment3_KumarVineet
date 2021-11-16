@@ -197,6 +197,8 @@ public static class ClientToServerSignifiers
 
     public const int PlayedPlayer1Turn = 100;
     public const int PlayedPlayer2Turn = 101;
+
+    public const int SpectatorAnnounceWinner = 104;
 }
 
 public static class ServerToClientSignifiers
@@ -224,4 +226,5 @@ public static class ServerToClientSignifiers
     public const int Player1TurnReceive = 101;
     public const int SpectatorTurnReceive = 102;
     public const int SpectatorMovesHistoryReceive = 103;
+    public const int SpectatorAnnounceWinner = 104;
 }

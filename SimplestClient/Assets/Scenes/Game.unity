@@ -6785,6 +6785,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2a55b665574b46438c6a8b6a5b1bf1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerName: {fileID: 1485089360}
   player1: 1
   player2: 2
   player1Symbol: X
