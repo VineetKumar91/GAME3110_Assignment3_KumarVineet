@@ -834,7 +834,7 @@ public class NetworkedServer : MonoBehaviour
         {
             if (playerAccount.clientID == id)
             {
-                message += "From " + playerAccount.username + ": " + receivedMessageSplit[1];
+                message += "From " + playerAccount.username + ": " + receivedMessageSplit[2];
             }
         }
 
