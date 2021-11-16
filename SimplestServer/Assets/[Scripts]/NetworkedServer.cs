@@ -223,10 +223,15 @@ public class NetworkedServer : MonoBehaviour
                 SpectatorAnnounceWinner(receivedMessageSplit, id);
                 break;
 
+            case ClientToServerSignifiers.GameRoomPlayerLeave:
+                GameRoomPlayerLeave(receivedMessageSplit, id);
+                break;
+
             default:
                 break;
         }
     }
+
 
 
 
@@ -581,6 +586,41 @@ public class NetworkedServer : MonoBehaviour
         SendMessageToClient(ServerToClientSignifiers.GameRoomSpectatorLeft + ",", id);
     }
 
+    /// <summary>
+    /// Game Room Player Leave
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
+    /// <param name="id"></param>
+    private void GameRoomPlayerLeave(string[] receivedMessageSplit, int id)
+    {
+        string playerName = "";
+
+        foreach (var playerAccount in GameRoomPlayerList)
+        {
+            if (playerAccount.clientID == id)
+            {
+                GameRoomPlayerList.Remove(playerAccount);
+                break;
+            }
+        }
+
+        // Send message to other player that opponent has left
+        foreach (var playerAccount in GameRoomPlayerList)
+        {
+            SendMessageToClient(ServerToClientSignifiers.GameRoomPlayerLeft + ",", playerAccount.clientID);
+        }
+
+        foreach (var playerAccount in GameRoomSpectatorList)
+        {
+            SendMessageToClient(ServerToClientSignifiers.GameRoomPlayerLeft + ",", playerAccount.clientID);
+        }
+
+        // Clear all list
+        GameRoomPlayerList.Clear();
+        MovesOrderList.Clear();
+        GameRoomSpectatorList.Clear();
+    }
+
 
 
     /// <summary>
@@ -734,6 +774,9 @@ public class NetworkedServer : MonoBehaviour
     /// <param name="id"></param>
     private void SpectatorAnnounceWinner(string[] receivedMessageSplit, int id)
     {
+        // Clear moves
+        MovesOrderList.Clear();
+
         string winner = receivedMessageSplit[1];
 
         foreach (var spectator in GameRoomSpectatorList)
@@ -870,6 +913,7 @@ public static class ClientToServerSignifiers
     public const int GameRoomPlayersRequest = 30;
     public const int GameRoomSpectatorsRequest = 31;
     public const int GameRoomSpectatorLeave = 32;
+    public const int GameRoomPlayerLeave = 33;
 
     public const int PlayedPlayer1Turn = 100;
     public const int PlayedPlayer2Turn = 101;
@@ -897,6 +941,7 @@ public static class ServerToClientSignifiers
     public const int GameRoomPlayersSend = 30;
     public const int GameRoomSpectatorsSend = 31;
     public const int GameRoomSpectatorLeft = 32;
+    public const int GameRoomPlayerLeft = 33;
 
     public const int Player2TurnReceive = 100;
     public const int Player1TurnReceive = 101;

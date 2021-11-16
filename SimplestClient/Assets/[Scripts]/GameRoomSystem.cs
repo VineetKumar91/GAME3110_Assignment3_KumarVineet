@@ -75,7 +75,15 @@ public class GameRoomSystem : MonoBehaviour
     [SerializeField]
     private Text FinishGameFirst;
 
-    
+    [Header("Exit Game Room")] 
+    public Text exitGameRoom;
+
+    [Header("Prefixed Messages")] 
+    [SerializeField]
+    private Text Player1TextField;
+
+    [SerializeField]
+    private Text Player2TextField;
 
     public static GameRoomSystem GetInstance()
     {
@@ -220,8 +228,42 @@ public class GameRoomSystem : MonoBehaviour
         {
             SpectatorAnnounceWinner(receivedMessageSplit);
         }
+        else if (signifer == ServerToClientSignifiers.GameRoomPlayerLeft)
+        {
+            GameRoomPlayerLeft(receivedMessageSplit);
+        }
     }
 
+    /// <summary>
+    /// Exiting Game Room
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
+    private void GameRoomPlayerLeft(string[] receivedMessageSplit)
+    {
+        if (isPlayer)
+        {
+            exitGameRoom.text = "Opponent Left. Exiting Game Room in 10 seconds...";
+        }
+        else
+        {
+            exitGameRoom.text = "Players Left. Exiting Game Room in 10 seconds...";
+        }
+        exitGameRoom.gameObject.SetActive(true);
+
+        StartCoroutine("ExitGameRoom");
+    }
+
+    IEnumerator ExitGameRoom()
+    {
+        yield return new WaitForSeconds(9f);
+
+        GameManager.GetInstance().ChangeMode(CurrentMode.Lobby);
+    }
+
+    /// <summary>
+    /// Announce winner for spectator
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
     private void SpectatorAnnounceWinner(string[] receivedMessageSplit)
     {
         Debug.Log(receivedMessageSplit[1]);
@@ -580,6 +622,9 @@ public class GameRoomSystem : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Back button
+    /// </summary>
     public void Button_Back()
     {
         // Match is on and you are a player who wants to go back... NO!
@@ -590,6 +635,11 @@ public class GameRoomSystem : MonoBehaviour
         else if (!isMatchActive && isPlayer)
         {
             // Leave room
+            GameManager.GetInstance().ChangeMode(CurrentMode.Lobby);
+            string msg = "";
+            msg += ClientToServerSignifiers.GameRoomPlayerLeave + ",";
+
+            networkedClient.SendMessageToHost(msg);
         }
         else if (isMatchActive && !isPlayer)
         {

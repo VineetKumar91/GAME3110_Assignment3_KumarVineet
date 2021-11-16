@@ -124,6 +124,7 @@ public class LobbySystem : MonoBehaviour
         else if (signifer == ServerToClientSignifiers.PlayerJoinGameSendYes)
         {
             GameManager.GetInstance().ChangeMode(CurrentMode.GameRoom);
+            JoinGameStatus.text = "";
         }
         else if (signifer == ServerToClientSignifiers.PlayerJoinGameSendNo)
         {
@@ -132,6 +133,7 @@ public class LobbySystem : MonoBehaviour
         else if (signifer == ServerToClientSignifiers.PlayerSpectateGameSend)
         {
             GameManager.GetInstance().ChangeMode(CurrentMode.GameRoom);
+            JoinGameStatus.text = "";
         }
     }
 
