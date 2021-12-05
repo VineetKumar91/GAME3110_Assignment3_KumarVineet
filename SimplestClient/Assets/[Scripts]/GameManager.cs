@@ -12,6 +12,7 @@ public enum CurrentMode
    Login,
    Lobby,
    GameRoom,
+   ReplayRoom,
 }
 
 
@@ -34,6 +35,9 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     GameObject GameRoom;
+
+    [SerializeField]
+    GameObject ReplayRoom;
 
 
     private void Start()
@@ -64,6 +68,7 @@ public class GameManager : MonoBehaviour
             case CurrentMode.Login:
                 GameRoom.gameObject.SetActive(false);
                 Lobby.gameObject.SetActive(false);
+                ReplayRoom.gameObject.SetActive(false);
 
                 LoginCanvas.gameObject.SetActive(true);
                 break;
@@ -72,6 +77,7 @@ public class GameManager : MonoBehaviour
             case CurrentMode.Lobby:
                 LoginCanvas.gameObject.SetActive(false);
                 GameRoom.gameObject.SetActive(false);
+                ReplayRoom.gameObject.SetActive(false);
 
                 Lobby.gameObject.SetActive(true);
                 break;
@@ -79,8 +85,17 @@ public class GameManager : MonoBehaviour
             case CurrentMode.GameRoom:
                 LoginCanvas.gameObject.SetActive(false);
                 Lobby.gameObject.SetActive(false);
+                ReplayRoom.gameObject.SetActive(false);
 
                 GameRoom.gameObject.SetActive(true);
+                break;
+
+            case CurrentMode.ReplayRoom:
+                LoginCanvas.gameObject.SetActive(false);
+                Lobby.gameObject.SetActive(false);
+                GameRoom.gameObject.SetActive(false);
+
+                ReplayRoom.gameObject.SetActive(true);
                 break;
         }
     }

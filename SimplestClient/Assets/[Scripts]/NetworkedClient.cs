@@ -207,6 +207,8 @@ public static class ClientToServerSignifiers
     public const int PlayedPlayer2Turn = 101;
 
     public const int SpectatorAnnounceWinner = 104;
+
+    public const int ReplayListRequest = 60;
 }
 
 public static class ServerToClientSignifiers

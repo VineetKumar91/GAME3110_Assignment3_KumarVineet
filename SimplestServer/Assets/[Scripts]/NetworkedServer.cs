@@ -35,6 +35,8 @@ public class NetworkedServer : MonoBehaviour
 
     public List<PlayerAccount> GameRoomPlayerList;
     public List<PlayerAccount> GameRoomSpectatorList;
+
+    // Server side replay
     public List<MovesOrderClass> MovesOrderList;
 
     // Start is called before the first frame update
@@ -73,6 +75,7 @@ public class NetworkedServer : MonoBehaviour
 
         GameRoomSpectatorList = new List<PlayerAccount>();
 
+        // Server side replay
         MovesOrderList = new List<MovesOrderClass>();
     }
 
@@ -1006,6 +1009,8 @@ public static class ClientToServerSignifiers
     public const int PlayedPlayer2Turn = 101;
 
     public const int SpectatorAnnounceWinner = 104;
+
+    public const int ReplayListRequest = 60;
 }
 
 /// <summary>
