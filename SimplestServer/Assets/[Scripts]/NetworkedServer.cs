@@ -8,10 +8,6 @@ using System.Linq;
 using UnityEngine.UI;
 using System;
 
-/// <summary>
-/// 1/11/12
-/// Integrating login system and chat system from client
-/// </summary>
 public class NetworkedServer : MonoBehaviour
 {
     int maxConnections = 1000;
@@ -25,19 +21,9 @@ public class NetworkedServer : MonoBehaviour
     int socketPort = 5111; // Why this socket port number ??
     int clientID1;
 
-    // My tweak for basic chat send
-    [SerializeField] private InputField inputFieldToClient; // input field for text entry
 
-    [SerializeField] private Text fromClientTextField; // text field for showing sent message
-
-    /// <summary>
-    /// 4th Oct
-    /// </summary>
     public LinkedList<PlayerAccount> playerAccountsList;
 
-    /// <summary>
-    /// 8th Nov
-    /// </summary>
     public LinkedList<PlayerAccount> onlinePlayerAccounts;
 
     public string filePath;
@@ -129,10 +115,6 @@ public class NetworkedServer : MonoBehaviour
     {
         Debug.Log("To ID: " + clientID1);
 
-        // Take message from input field and send it to the function for NetworkTransport.Send
-        // Also send clientID
-        SendMessageToClient(inputFieldToClient.text, clientID1);
-        inputFieldToClient.text = "";
     }
 
     // Send message to the client using client ID and textinput's text
@@ -165,9 +147,6 @@ public class NetworkedServer : MonoBehaviour
     {
         Debug.Log("msg recieved = " + msg + ".  connection id = " + id);
 
-        // Put the received text into the UI text field
-        fromClientTextField.text = "Client: " + msg;
-
         // Store the client ID (temporary way, optimized one will be researched and implemented later..)
         clientID1 = id;
 
@@ -180,7 +159,6 @@ public class NetworkedServer : MonoBehaviour
             case (ClientToServerSignifiers.CreateAccount):
                 CreateAccount(receivedMessageSplit, id);
                 break;
-
 
             case ClientToServerSignifiers.Login:
                 Login(receivedMessageSplit, id);
@@ -489,10 +467,6 @@ public class NetworkedServer : MonoBehaviour
             }
 
             GameRoomPlayerList.Add(joinPlayerAccount);
-
-            // Test ID
-            //Debug.Log("ID Parameter = " + id);
-            //Debug.Log("ID from List = " + joinPlayerAccount.clientID);
 
             // If 1, then waiting
             if (GameRoomPlayerList.Count == 1)
@@ -822,8 +796,11 @@ public class NetworkedServer : MonoBehaviour
         }
     }
 
-
-    // Lobby Messages
+    /// <summary>
+    /// PM in Lobby
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
+    /// <param name="id"></param>
     private void LobbySendPersonalMessage(string[] receivedMessageSplit, int id)
     {
         string PMUser = receivedMessageSplit[1];
@@ -849,6 +826,11 @@ public class NetworkedServer : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Lobby Global message
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
+    /// <param name="id"></param>
     private void LobbySendGlobalMessage(string[] receivedMessageSplit, int id)
     {
         string message = "";
@@ -924,6 +906,9 @@ public class NetworkedServer : MonoBehaviour
         streamWriter.Close();
     }
 
+    /// <summary>
+    /// Read account details from file
+    /// </summary>
     void Account_ReadFromFile()
     {
         // Clear the file contents before loading up the list
@@ -947,15 +932,26 @@ public class NetworkedServer : MonoBehaviour
     }
 }
 
-// Moves order class for keeping track of moves done by whom
+
+/// <summary>
+/// STEP 1 of making replay server side!
+/// </summary>
 public class MovesOrderClass
 {
     public Vector2Int moveLocation;
     public int player;
 
+    /// <summary>
+    /// Default constructor
+    /// </summary>
     public MovesOrderClass()
     { }
 
+    /// <summary>
+    /// Parameterized Constructor
+    /// </summary>
+    /// <param name="mL"></param>
+    /// <param name="Player"></param>
     public MovesOrderClass(Vector2Int mL, int Player)
     {
         moveLocation = mL;
@@ -983,7 +979,7 @@ public class PlayerAccount
 
 
 /// <summary>
-/// LOGIN/CREATE ACCOUNT - CLIENT TO SERVER, SERVER TO CLIENT 
+/// Client to Server Signifiers
 /// </summary>
 public static class ClientToServerSignifiers
 {
@@ -1012,6 +1008,9 @@ public static class ClientToServerSignifiers
     public const int SpectatorAnnounceWinner = 104;
 }
 
+/// <summary>
+/// Server to Client signifiers
+/// </summary>
 public static class ServerToClientSignifiers
 {
     public const int LoginComplete = 1;
