@@ -389,9 +389,7 @@ public class GameRoomSystem : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
-
         
-
         // Add to local list
         for (int i = 1; i < receivedMessageSplit.Length; i++)
         {
@@ -408,39 +406,6 @@ public class GameRoomSystem : MonoBehaviour
             spectatorGameObject.GetComponent<Text>().text = spectatorUsername;
         }
     }
-
-    /// <summary>
-    /// Spectator List Send
-    /// </summary>
-    /// <param name="receivedMessageSplit"></param>
-    //private void GameRoomSpectatorsSend(string[] receivedMessageSplit)
-    //{
-    //    // Clear the list
-    //    spectatorList.Clear();
-    //
-    //    // Destroy the spectator UI game objects
-    //    foreach (Transform child in SpectatorPanel.transform)
-    //    {
-    //        Destroy(child.gameObject);
-    //    }
-    //
-    //    // Add to local list
-    //    for (int i = 1; i < receivedMessageSplit.Length; i++)
-    //    {
-    //        if (receivedMessageSplit[i] != "")
-    //        {
-    //            spectatorList.Add(receivedMessageSplit[i]);
-    //        }
-    //    }
-    //    
-    //
-    //    // Instantiate those game objects
-    //    foreach (var spectatorUsername in spectatorList)
-    //    {
-    //        GameObject spectatorGameObject = Instantiate(SpectatorUsernameTextObject, SpectatorPanel.transform);
-    //        spectatorGameObject.GetComponent<Text>().text = spectatorUsername;
-    //    }
-    //}
 
 
     /// <summary>
@@ -739,7 +704,10 @@ public class GameRoomSystem : MonoBehaviour
         }
     }
 
-
+    /// <summary>
+    /// A standard coroutine for showing replays
+    /// </summary>
+    /// <returns></returns>
     IEnumerator ReplayModePlay()
     {
         ReplaySystem.MovesOrderClass movesOrderTemp = new ReplaySystem.MovesOrderClass();

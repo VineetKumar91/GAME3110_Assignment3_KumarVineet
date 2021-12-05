@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Which screen is the player in ENUM
+/// </summary>
 public enum CurrentMode
 {
    Login,
@@ -12,6 +15,9 @@ public enum CurrentMode
 }
 
 
+/// <summary>
+/// Standard Game Mgr with monobehaviour
+/// </summary>
 public class GameManager : MonoBehaviour
 {
     private static GameManager _instance;
@@ -32,20 +38,23 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        // Initially Start is the current mode
         currentMode = CurrentMode.Login;
 
+        // Reference to self for lazy singleton
         _instance = this;
     }
 
+    // Reference of Game Manager Instance, in case singleton needs to be implemented
     public static GameManager GetInstance()
     {
         return _instance;
     }
 
-    private void Update()
-    {
-    }
-
+    /// <summary>
+    /// Change current mode by disabling all the modes except for this mode
+    /// </summary>
+    /// <param name="currentmode"></param>
     public void ChangeMode(CurrentMode currentmode)
     {
         currentMode = currentmode;
@@ -70,7 +79,6 @@ public class GameManager : MonoBehaviour
             case CurrentMode.GameRoom:
                 LoginCanvas.gameObject.SetActive(false);
                 Lobby.gameObject.SetActive(false);
-
 
                 GameRoom.gameObject.SetActive(true);
                 break;

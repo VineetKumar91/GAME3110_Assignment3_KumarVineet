@@ -9,6 +9,7 @@ public class ReplaySystem : MonoBehaviour
     [SerializeField] 
     public int[,] TicTacToeGameReplay;
 
+    // Queue data struct for storing moves IN order
     public Queue<MovesOrderClass> movesOrder;
 
     public static ReplaySystem _instance;
@@ -47,14 +48,25 @@ public class ReplaySystem : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// A class for storing move location AND which player
+    /// </summary>
     public class MovesOrderClass
     {
         public Vector2Int moveLocation;
         public int player;
 
+        /// <summary>
+        /// def constructor
+        /// </summary>
         public MovesOrderClass()
         { }
 
+        /// <summary>
+        /// Parameterized constructor
+        /// </summary>
+        /// <param name="mL"></param>
+        /// <param name="Player"></param>
         public MovesOrderClass(Vector2Int mL, int Player)
         {
             moveLocation = mL;

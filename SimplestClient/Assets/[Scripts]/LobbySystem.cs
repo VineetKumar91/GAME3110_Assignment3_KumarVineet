@@ -76,17 +76,6 @@ public class LobbySystem : MonoBehaviour
     }
 
 
-    // Set username when enabled
-    private void OnEnable()
-    {
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-       
-    }
-
     /// <summary>
     /// Request the player list
     /// </summary>
@@ -230,10 +219,6 @@ public class LobbySystem : MonoBehaviour
         {
             GameObject usernameText = Instantiate(UsernameTextObject, UsersPanel.transform);
             usernameText.GetComponent<Text>().text = username;
-            //if (firstUserName == 0)
-            //{
-            //    usernameText.GetComponent<Text>().color = Color.green;
-            //}
 
             firstUserName++;
             
@@ -289,7 +274,10 @@ public class LobbySystem : MonoBehaviour
         }
     }
 
-    // Receive Messages
+    /// <summary>
+    /// Receive Messages
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
     private void LobbyReceivePersonalMessage(string[] receivedMessageSplit)
     {
         string message = receivedMessageSplit[1];
@@ -313,6 +301,10 @@ public class LobbySystem : MonoBehaviour
         messagesList.Add(msg);
     }
 
+    /// <summary>
+    /// Receive Global Message 
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
     private void LobbyReceiveGlobalMessage(string[] receivedMessageSplit)
     {
         string message = receivedMessageSplit[1];
@@ -339,8 +331,7 @@ public class LobbySystem : MonoBehaviour
 
     /// <summary>
     /// Send message
-    /// 1. Create locally first
-    /// @TODO Do Server next
+    /// Create locally first
     /// </summary>
     /// <param name="text"></param>
     public void SendMessageToChat(string text, string username)

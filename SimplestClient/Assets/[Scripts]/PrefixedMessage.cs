@@ -19,6 +19,11 @@ public class PrefixedMessage : MonoBehaviour, IPointerClickHandler
 
     public float timerStart = 0;
     public float duration = 4;
+
+    /// <summary>
+    /// On Pointer Click is Event Trigger
+    /// </summary>
+    /// <param name="eventData"></param>
     public void OnPointerClick(PointerEventData eventData)
     {
         if (GameRoomSystem.GetInstance().isPlayer)
@@ -43,7 +48,7 @@ public class PrefixedMessage : MonoBehaviour, IPointerClickHandler
     }
 
 
-    // Clear after 4 seconds
+    // Clear after 4 seconds in fixed Update
     private void FixedUpdate()
     {
         if (isVisible1)
