@@ -8,6 +8,9 @@ using System.Linq;
 using UnityEngine.UI;
 using System;
 
+// TODO!!! THE FOR EACH TO RETURN THE CURRENT CLIENT CAN BE PUT IN 1 FUNCTION -> 50+ lines of redundant code gone!
+// TODO!!! YOU ARE ALREADY HAVING THE REPLAY SYSTEM IN YOUR SERVER STUPID, YOU HAD ALREADY IMPLEMENTED IT.. WHY DIDN'T YOU USE IT
+
 public class NetworkedServer : MonoBehaviour
 {
     int maxConnections = 1000;

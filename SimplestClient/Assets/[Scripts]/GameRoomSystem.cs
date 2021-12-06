@@ -36,7 +36,6 @@ public class GameRoomSystem : MonoBehaviour
     public bool isPlayer1 = false;
 
     public bool isMatchActive;
-    public int winningPlayer = 0;
 
     [SerializeField] 
     private Text currentTurn;
@@ -323,7 +322,16 @@ public class GameRoomSystem : MonoBehaviour
     private void SpectatorAnnounceWinner(string[] receivedMessageSplit)
     {
         Debug.Log(receivedMessageSplit[1]);
-        currentTurn.text = receivedMessageSplit[1] + " has won.";
+
+        if (int.Parse(receivedMessageSplit[1]) == 0)
+        {
+            currentTurn.text = "It's a tie!";
+        }
+        else
+        {
+            currentTurn.text = receivedMessageSplit[1] + " has won.";
+        }
+        
     }
 
     /// <summary>
@@ -478,6 +486,9 @@ public class GameRoomSystem : MonoBehaviour
             isPlayer1Turn = true;
             currentTurn.text = "Turn: " + playerList[0];
         }
+
+        // TODO: fix for game over check
+        movesDone++;
 
         WinConditionCheck();
 
@@ -740,9 +751,23 @@ public class GameRoomSystem : MonoBehaviour
     /// 3 verticals 00 10 20, 01 11 21, 02 12 22
     /// 2 cross 00 11 22, 20 11 02
     /// </summary>
+    /// Vineet Kumar: @TODO: Assignment 3 - can package into one...
     public void WinConditionCheck()
     {
-        if  (
+        Debug.Log("Total Moves done = " + movesDone);
+        if (movesDone >= 9)
+        {
+            Debug.Log("Tie");
+            isMatchActive = false;
+            currentTurn.text = "It's a tie!";
+
+            string msg = "";
+
+            msg = 0 + ",";
+
+            networkedClient.SendMessageToHost(ClientToServerSignifiers.SpectatorAnnounceWinner + "," + msg);
+        }
+        else if  (
                 //horizontals
                 TicTacToeGame[0, 0] == player1 && TicTacToeGame[0, 1] == player1 && TicTacToeGame[0, 2] == player1 ||
                 TicTacToeGame[1, 0] == player1 && TicTacToeGame[1, 1] == player1 && TicTacToeGame[1, 2] == player1 ||
@@ -759,7 +784,6 @@ public class GameRoomSystem : MonoBehaviour
         )
         {
             Debug.Log("Player 1 Won");
-            winningPlayer = 1;
             isMatchActive = false;
             currentTurn.text = playerList[0] + " has Won";
 
@@ -786,7 +810,6 @@ public class GameRoomSystem : MonoBehaviour
         )
         {
             Debug.Log("Player 2 Won");
-            winningPlayer = 2;
             isMatchActive = false;
             currentTurn.text = playerList[1] + " has Won";
 
