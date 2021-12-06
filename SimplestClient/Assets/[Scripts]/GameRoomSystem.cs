@@ -57,7 +57,8 @@ public class GameRoomSystem : MonoBehaviour
     [SerializeField] 
     private GameObject buttonPrefab;
 
-    [Header("Networked Client")] [SerializeField]
+    [Header("Networked Client")] 
+    [SerializeField]
     private NetworkedClient networkedClient;
 
 

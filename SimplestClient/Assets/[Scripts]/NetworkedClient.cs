@@ -170,6 +170,10 @@ public class NetworkedClient : MonoBehaviour
         {
             GameRoomSystem.GetInstance().HandleResponseFromServer(msg);
         }
+        else if (GameManager.currentMode == CurrentMode.ReplayRoom)
+        {
+            ReplayListRoom.GetInstance().HandleResponseFromServer(msg);
+        }
     }
 
     public bool IsConnected()
@@ -243,5 +247,6 @@ public static class ServerToClientSignifiers
     public const int SpectatorTurnReceive = 102;
     public const int SpectatorMovesHistoryReceive = 103;
     public const int SpectatorAnnounceWinner = 104;
-
+    
+    public const int ReplayListSend = 60;
 }

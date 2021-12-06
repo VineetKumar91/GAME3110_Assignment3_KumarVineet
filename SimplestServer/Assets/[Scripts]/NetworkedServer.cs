@@ -220,6 +220,11 @@ public class NetworkedServer : MonoBehaviour
                 LobbySendPersonalMessage(receivedMessageSplit, id);
                 break;
 
+
+            case ClientToServerSignifiers.ReplayListRequest:
+                ReplayRoomSendReplayList(receivedMessageSplit, id);
+                break;
+
             default:
                 break;
         }
@@ -649,8 +654,6 @@ public class NetworkedServer : MonoBehaviour
         }
 
         SendMessageToClient(ServerToClientSignifiers.GameRoomPlayersSend + "," + msg, id);
-
-        //Debug.Log("WHAT THE FK AM I SENDING count =  " + GameRoomPlayerList.Count + " Content = " + ServerToClientSignifiers.GameRoomPlayersSend + "," + msg);
     }
 
     /// <summary>
@@ -853,8 +856,20 @@ public class NetworkedServer : MonoBehaviour
                 SendMessageToClient(ServerToClientSignifiers.LobbyReceiveGlobalMessage + "," + message, playerAccount.clientID);
             }
         }
+    }
+
+
+    /// <summary>
+    /// Send the replay list to the client asking for it
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
+    /// <param name="id"></param>
+    private void ReplayRoomSendReplayList(string[] receivedMessageSplit, int id)
+    {
 
     }
+
+
 
 
     /// <summary>
@@ -1048,4 +1063,6 @@ public static class ServerToClientSignifiers
     public const int SpectatorTurnReceive = 102;
     public const int SpectatorMovesHistoryReceive = 103;
     public const int SpectatorAnnounceWinner = 104;
+    
+    public const int ReplayListSend = 60;
 }
