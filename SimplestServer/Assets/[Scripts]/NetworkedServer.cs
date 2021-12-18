@@ -40,8 +40,11 @@ public class NetworkedServer : MonoBehaviour
     public List<MovesOrderClass> MovesOrderList;
 
     // Server side replay
+    public static List<IndexAndName> replayPlayerIndex;
     public Queue<MovesOrderClass> ReplaySystemMovesRecorder;
-    public string replaySavePath = "";
+    public static string replaySavePath = "";
+    const string indexFileName = "ReplayIndices.txt";
+    public int lastIndexUsed = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -86,7 +89,43 @@ public class NetworkedServer : MonoBehaviour
         ReplaySystemMovesRecorder = new Queue<MovesOrderClass>();
         replaySavePath = Application.dataPath + Path.DirectorySeparatorChar;
 
+        GetReplaylist();
 
+    }
+
+    /// <summary>
+    /// Get replay list index
+    /// </summary>
+    private void GetReplaylist()
+    {
+        replayPlayerIndex = new List<IndexAndName>();
+
+        if (File.Exists(replaySavePath + indexFileName))
+        {
+            StreamReader streamReader = new StreamReader(replaySavePath + indexFileName);
+
+            string line;
+
+            while ((line = streamReader.ReadLine()) != null)
+            {
+                string[] splitLine = line.Split(',');
+
+                // the 0th element is a signifier, use it to go to the next and perform respective functions.
+                switch (int.Parse(splitLine[0]))
+                {
+                    case (int)SignifierTypes.LastUsedSignifier:
+                        // save the last index used
+                        lastIndexUsed = int.Parse(splitLine[1]);
+                        break;
+
+
+                    case (int)SignifierTypes.IndexAndNameSignifer:
+                        // index of name and index, and the actual name to the linked list
+                        replayPlayerIndex.Add(new IndexAndName(int.Parse(splitLine[1]), splitLine[2]));
+                        break;
+                }
+            }
+        }
     }
 
     // Update is called once per frame
@@ -904,12 +943,19 @@ public class NetworkedServer : MonoBehaviour
             streamWriter.WriteLine(replayMove.moveLocation.x + "," + replayMove.moveLocation.y + ",");
         }
 
+        // increment last index used
+        lastIndexUsed++;
+
+        // add it to the list
+        replayPlayerIndex.Add(new IndexAndName(lastIndexUsed,filename));
+
+        SaveReplayIndexManagementFile();
+
         // Flush for clearing the streamwriter
         streamWriter.Flush();
 
         // Close the stream writer
         streamWriter.Close();
-
     }
 
 
@@ -924,6 +970,30 @@ public class NetworkedServer : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// A function similar to streaming data labs
+    /// create an index to the file being used, similar to the index of a book
+    /// format: first line will have a signifier, number of replays
+    /// format: from second line, signifier, filename
+    /// </summary>
+    public void SaveReplayIndexManagementFile()
+    {
+        // streamwriter using Application datapath, and the path.separatorchar '/' + file name
+        StreamWriter streamWriter =
+            new StreamWriter(replaySavePath + indexFileName);
+
+        streamWriter.WriteLine((int)SignifierTypes.LastUsedSignifier + "," + lastIndexUsed);
+
+        foreach (var indexAndName in replayPlayerIndex)
+        {
+            streamWriter.WriteLine((int)SignifierTypes.IndexAndNameSignifer
+                                   + "," + indexAndName.index +
+                                   "," + indexAndName.name);
+        }
+
+        // close the outstream
+        streamWriter.Close();
+    }
 
 
     /// <summary>
@@ -1121,4 +1191,34 @@ public static class ServerToClientSignifiers
     
     public const int ReplayListSend = 60;
     public const int ReplayListLoad = 61;
+}
+
+
+
+/// <summary>
+/// Signifiers for replay
+/// </summary>
+public static class SignifierTypes
+{
+    public const int DEFAULTZERO = 0;
+    public const int LastUsedSignifier = 1;
+    public const int IndexAndNameSignifer = 2;
+}
+
+
+/// <summary>
+/// Index and name for replay index management
+/// </summary>
+public class IndexAndName
+{
+    public string name;
+    public int index = 0;
+
+    // constructor
+    public IndexAndName(int index, string name)
+    {
+        this.index = index;
+        this.name = name;
+    }
+
 }

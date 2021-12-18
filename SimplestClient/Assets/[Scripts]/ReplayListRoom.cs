@@ -52,6 +52,16 @@ public class ReplayListRoom : MonoBehaviour
         // When enabled, first thing is to populate the drop down menu
         // Request the replay list from server
         RequestPlayerReplayList();
+
+        InitializeDropDown();
+    }
+
+    /// <summary>
+    /// Initialize the drop down menu
+    /// </summary>
+    private void InitializeDropDown()
+    {
+        
     }
 
 
