@@ -277,10 +277,16 @@ public class NetworkedServer : MonoBehaviour
                 ReplayRoomSendReplayList(receivedMessageSplit, id);
                 break;
 
+            case ClientToServerSignifiers.ReplayRequest:
+                ReplayRoomSendReplay(receivedMessageSplit,id);
+                break;
+
             default:
                 break;
         }
     }
+
+
 
     /// <summary>
     /// Create account
@@ -931,8 +937,9 @@ public class NetworkedServer : MonoBehaviour
         string player2 = receivedMessageSplit[3];
         string savingPlayer = receivedMessageSplit[4];
 
-        string filename = savingPlayer + "-Match-" + player1 + "-" + vs +  "-" + player2 + ".txt";
-        string filePath = replaySavePath + "/" + filename;
+        string filename = savingPlayer + "-Match-" + player1 + "-" + vs + "-" + player2;
+        string filenameWithFormat = filename + ".txt";
+        string filePath = replaySavePath + "/" + filenameWithFormat;
         // Streamwriter - write to file
 
         File.WriteAllText(filePath,"");
@@ -947,7 +954,7 @@ public class NetworkedServer : MonoBehaviour
         lastIndexUsed++;
 
         // add it to the list
-        replayPlayerIndex.Add(new IndexAndName(lastIndexUsed,filename));
+        replayPlayerIndex.Add(new IndexAndName(lastIndexUsed, filename));
 
         SaveReplayIndexManagementFile();
 
@@ -966,9 +973,36 @@ public class NetworkedServer : MonoBehaviour
     /// <param name="id"></param>
     private void ReplayRoomSendReplayList(string[] receivedMessageSplit, int id)
     {
+        string msg = "";
 
+        foreach (var indexAndName in replayPlayerIndex)
+        {
+            msg += indexAndName.name + ",";
+        }
+
+        SendMessageToClient(ServerToClientSignifiers.ReplayListSend + "," + msg, id);
     }
 
+
+    /// <summary>
+    /// Send Replay
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
+    /// <param name="id"></param>
+    private void ReplayRoomSendReplay(string[] receivedMessageSplit, int id)
+    {
+        StreamReader streamReader = new StreamReader(replaySavePath + receivedMessageSplit[1] + ".txt");
+
+        string line = "";
+        string msg = "";
+        while ((line = streamReader.ReadLine()) != null)
+        {
+            msg += line;
+        }
+
+        Debug.Log(msg);
+        SendMessageToClient(ServerToClientSignifiers.ReplaySend + "," + msg, id);
+    }
 
     /// <summary>
     /// A function similar to streaming data labs
@@ -1151,6 +1185,7 @@ public static class ClientToServerSignifiers
 
     public const int ReplayListRequest = 60;
     public const int ReplayListSave = 61;
+    public const int ReplayRequest = 62;
 }
 
 /// <summary>
@@ -1191,6 +1226,7 @@ public static class ServerToClientSignifiers
     
     public const int ReplayListSend = 60;
     public const int ReplayListLoad = 61;
+    public const int ReplaySend = 62;
 }
 
 

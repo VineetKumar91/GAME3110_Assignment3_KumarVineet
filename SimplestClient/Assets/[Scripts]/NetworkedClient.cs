@@ -214,6 +214,7 @@ public static class ClientToServerSignifiers
 
     public const int ReplayListRequest = 60;
     public const int ReplayListSave = 61;
+    public const int ReplayRequest = 62;
 }
 
 public static class ServerToClientSignifiers
@@ -251,4 +252,5 @@ public static class ServerToClientSignifiers
     
     public const int ReplayListSend = 60;
     public const int ReplayListLoad = 61;
+    public const int ReplaySend = 62;
 }

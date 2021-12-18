@@ -27,11 +27,43 @@ public class ReplayListRoom : MonoBehaviour
 
     // Replay Room instance
     private static ReplayListRoom _instance;
+    
+    // Replay System
+    [SerializeField]
+    private ReplaySystem replaySystemRef;
+
+    private bool isReplayOn = false;
 
     // Start is called before the first frame update
     void Start()
     {
         _instance = this;
+
+        if (AllButtons == null)
+        {
+            AllButtons = new List<Button>();
+        }
+
+        int row = 0;
+        int col = 0;
+
+        for (int i = 0; i < 9; i++)
+        {
+            GameObject button = Instantiate(buttonPrefab, TicTacToeObject.transform);
+            button.GetComponent<ButtonHandler>().buttonPosition = new Vector2Int(row, col);
+
+            AllButtons.Add(button.GetComponent<Button>());
+
+            if (col >= 2)
+            {
+                row++;
+                col = 0;
+            }
+            else
+            {
+                col++;
+            }
+        }
     }
 
     /// <summary>
@@ -61,14 +93,26 @@ public class ReplayListRoom : MonoBehaviour
     /// </summary>
     private void InitializeDropDown()
     {
-        
+        replaylistDropDown.onValueChanged.RemoveAllListeners();
+        replaylistDropDown.onValueChanged.AddListener(delegate
+        {
+            DropDownItemSelected(replaylistDropDown);
+        });
     }
 
-
-    // Update is called once per frame
-    void Update()
+    private void DropDownItemSelected(Dropdown dropdown)
     {
+        int menuIndex = dropdown.value;
+        Debug.Log(dropdown.options[menuIndex].text);
 
+        string message = "";
+
+        message = ClientToServerSignifiers.ReplayRequest + "," + dropdown.options[menuIndex].text;
+
+        if (networkedClient.IsConnected())
+        {
+            networkedClient.SendMessageToHost(message);
+        }
     }
 
     /// <summary>
@@ -102,8 +146,87 @@ public class ReplayListRoom : MonoBehaviour
             // Received replay list from server
             ReceiveReplayListFromServer(receivedMessageSplit);
         }
+        else if (signifer == ServerToClientSignifiers.ReplaySend)
+        {
+            // Received replay list from server
+            ReceiveReplayFromServer(receivedMessageSplit);
+        }
     }
 
+    /// <summary>
+    /// Receive Replay from server
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
+    private void ReceiveReplayFromServer(string[] receivedMessageSplit)
+    {
+        bool isPlayer1 = true;
+        for (int i = 1; i <= receivedMessageSplit.Length - 2; i += 2)
+        {
+            if (isPlayer1)
+            {
+                replaySystemRef.movesOrder.Enqueue(new ReplaySystem.MovesOrderClass(new Vector2Int(int.Parse(receivedMessageSplit[i]), int.Parse(receivedMessageSplit[i+1])), 0));
+                isPlayer1 = false;
+            }
+            else
+            {
+                replaySystemRef.movesOrder.Enqueue(new ReplaySystem.MovesOrderClass(new Vector2Int(int.Parse(receivedMessageSplit[i]), int.Parse(receivedMessageSplit[i + 1])), 1));
+                isPlayer1 = true;
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// Activate Replay
+    /// </summary>
+    public void Button_ActivateReplay()
+    {
+        if (!isReplayOn)
+        {
+            isReplayOn = true;
+            ClearButtons();
+            StartCoroutine("ReplayModePlay");
+        }
+    }
+
+    /// <summary>
+    /// A standard coroutine for showing replays
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator ReplayModePlay()
+    {
+        ReplaySystem.MovesOrderClass movesOrderTemp = new ReplaySystem.MovesOrderClass();
+        while (ReplaySystem.GetInstance().movesOrder.Count > 0)
+        {
+            yield return new WaitForSeconds(1f);
+
+            // Formula to convert from 3x3 matrix of Vector2Int (x,y) to List index
+            // 3x + y
+            movesOrderTemp = ReplaySystem.GetInstance().movesOrder.Dequeue();
+            if (movesOrderTemp.player == 0)
+            {
+                int index = 3 * movesOrderTemp.moveLocation.x + movesOrderTemp.moveLocation.y;
+                AllButtons[index].GetComponentInChildren<Text>().text = "X";
+            }
+            else
+            {
+                int index = 3 * movesOrderTemp.moveLocation.x + movesOrderTemp.moveLocation.y;
+                AllButtons[index].GetComponentInChildren<Text>().text = "O";
+            }
+        }
+    }
+
+    /// <summary>
+    /// Clear and deactivate all buttons
+    /// </summary>
+    public void ClearButtons()
+    {
+        foreach (var button in AllButtons)
+        {
+            button.interactable = false;
+            button.GetComponentInChildren<Text>().text = "";
+        }
+    }
 
     /// <summary>
     /// Request Player Replay List
@@ -127,6 +250,14 @@ public class ReplayListRoom : MonoBehaviour
     /// <param name="receivedMessageSplit"></param>
     public void ReceiveReplayListFromServer(string[] receivedMessageSplit)
     {
-
+        string tempNameOfReplay = "";
+        for (int i = 1; i < receivedMessageSplit.Length; i++)
+        {
+            tempNameOfReplay = receivedMessageSplit[i];
+            if (tempNameOfReplay != "")
+            {
+                replaylistDropDown.options.Add(new Dropdown.OptionData(tempNameOfReplay));
+            }
+        }
     }
 }

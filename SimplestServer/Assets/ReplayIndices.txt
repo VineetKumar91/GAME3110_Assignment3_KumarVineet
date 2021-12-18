@@ -1,2 +1,4 @@
-1,1
-2,1,qwe-Match-asd-vs-qwe.txt
+1,3
+2,1,qwe-Match-asd-vs-qwe
+2,2,asd-Match-zxc-vs-asd
+2,3,zxc-Match-zxc-vs-asd

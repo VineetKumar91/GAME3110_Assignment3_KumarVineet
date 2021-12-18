@@ -4349,8 +4349,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: GameRoomSystem, Assembly-CSharp
+      - m_Target: {fileID: 900284895}
+        m_TargetAssemblyTypeName: ReplayListRoom, Assembly-CSharp
         m_MethodName: Button_ActivateReplay
         m_Mode: 1
         m_Arguments:
@@ -4700,7 +4700,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Option A
+  m_Text: Replay
 --- !u!222 &808620963
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -4858,7 +4858,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &900284894
 Transform:
   m_ObjectHideFlags: 0
@@ -4892,6 +4892,7 @@ MonoBehaviour:
   AllButtons: []
   TicTacToeObject: {fileID: 507560237}
   buttonPrefab: {fileID: 2731519382090219631, guid: 049c307000d403244b1651d5c8d0055d, type: 3}
+  replaySystemRef: {fileID: 1908701023}
 --- !u!1 &931133880
 GameObject:
   m_ObjectHideFlags: 0
@@ -8796,11 +8797,7 @@ MonoBehaviour:
   m_Value: 0
   m_Options:
     m_Options:
-    - m_Text: Option A
-      m_Image: {fileID: 0}
-    - m_Text: Option B
-      m_Image: {fileID: 0}
-    - m_Text: Option C
+    - m_Text: Replay
       m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:
@@ -9483,6 +9480,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1908701022}
+  - component: {fileID: 1908701023}
   m_Layer: 0
   m_Name: ReplaySystem
   m_TagString: Untagged
@@ -9509,6 +9507,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1908701023
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1908701021}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dc2a64f19f0a194ea375c0fa7231210, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1910010117
 GameObject:
   m_ObjectHideFlags: 0
