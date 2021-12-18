@@ -14,8 +14,8 @@ public class GameRoomSystem : MonoBehaviour
     private List<string> playerList;
     private List<string> spectatorList;
 
-    [Header("Player")] 
-    [SerializeField] 
+    [Header("Player")]
+    [SerializeField]
     private Text playerName;
 
 
@@ -37,45 +37,46 @@ public class GameRoomSystem : MonoBehaviour
 
     public bool isMatchActive;
 
-    [SerializeField] 
+    [SerializeField]
     private Text currentTurn;
 
-    [SerializeField] 
+    [SerializeField]
     private Text PresetMessagePlayer1;
 
-    [SerializeField] 
+    [SerializeField]
     private Text PresetMessagePlayer2;
 
     [Header("TicTacToe")]
     // Buttons list
     public List<Button> AllButtons;
 
-    [SerializeField] 
+    [SerializeField]
     private GameObject TicTacToeObject;
 
-    [SerializeField] 
+    [SerializeField]
     private GameObject buttonPrefab;
 
-    [Header("Networked Client")] 
+    [Header("Networked Client")]
     [SerializeField]
     private NetworkedClient networkedClient;
 
 
-    [Header("Replay")] 
-    [SerializeField] 
+    [Header("Replay")]
+    [SerializeField]
     private ReplaySystem replaySystemRef;
     public bool isReplayOn = false;
+    public GameObject savedReplayText;
 
     [Header("Spectator")]
     public bool isPlayer = false;
     public GameObject SpectatorPanel;
     public GameObject SpectatorUsernameTextObject;
 
-    [Header("Back Button")] 
+    [Header("Back Button")]
     [SerializeField]
     private Text FinishGameFirst;
 
-    [Header("Exit Game Room")] 
+    [Header("Exit Game Room")]
     public Text exitGameRoom;
 
     [Header("Prefixed Messages")]
@@ -331,7 +332,7 @@ public class GameRoomSystem : MonoBehaviour
         {
             currentTurn.text = receivedMessageSplit[1] + " has won.";
         }
-        
+
     }
 
     /// <summary>
@@ -347,8 +348,8 @@ public class GameRoomSystem : MonoBehaviour
         for (int i = 1; i < receivedMessageSplit.Length; i += 3)
         {
             positionPlayed.x = int.Parse(receivedMessageSplit[i]);
-            positionPlayed.y = int.Parse(receivedMessageSplit[i+1]);
-            player = int.Parse(receivedMessageSplit[i+2]);
+            positionPlayed.y = int.Parse(receivedMessageSplit[i + 1]);
+            player = int.Parse(receivedMessageSplit[i + 2]);
 
             if (player == 1)
             {
@@ -398,7 +399,7 @@ public class GameRoomSystem : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
-        
+
         // Add to local list
         for (int i = 1; i < receivedMessageSplit.Length; i++)
         {
@@ -407,7 +408,7 @@ public class GameRoomSystem : MonoBehaviour
                 spectatorList.Add(receivedMessageSplit[i]);
             }
         }
-        
+
         // Instantiate those game objects
         foreach (var spectatorUsername in spectatorList)
         {
@@ -487,7 +488,6 @@ public class GameRoomSystem : MonoBehaviour
             currentTurn.text = "Turn: " + playerList[0];
         }
 
-        // TODO: fix for game over check
         movesDone++;
 
         WinConditionCheck();
@@ -670,7 +670,15 @@ public class GameRoomSystem : MonoBehaviour
         {
             isReplayOn = true;
             ClearButtons();
+            savedReplayText.SetActive(true);
             StartCoroutine("ReplayModePlay");
+
+            // Send message to sever to save replay
+            string msg = "";
+
+            msg = playerList[0] + "," + "vs" + "," + playerList[1] + "," + GameManager.currentUsername + ",";
+
+            networkedClient.SendMessageToHost(ClientToServerSignifiers.ReplayListSave + "," + msg);
         }
     }
 
@@ -751,7 +759,6 @@ public class GameRoomSystem : MonoBehaviour
     /// 3 verticals 00 10 20, 01 11 21, 02 12 22
     /// 2 cross 00 11 22, 20 11 02
     /// </summary>
-    /// Vineet Kumar: @TODO: Assignment 3 - can package into one...
     public void WinConditionCheck()
     {
         Debug.Log("Total Moves done = " + movesDone);
@@ -767,18 +774,18 @@ public class GameRoomSystem : MonoBehaviour
 
             networkedClient.SendMessageToHost(ClientToServerSignifiers.SpectatorAnnounceWinner + "," + msg);
         }
-        else if  (
+        else if (
                 //horizontals
                 TicTacToeGame[0, 0] == player1 && TicTacToeGame[0, 1] == player1 && TicTacToeGame[0, 2] == player1 ||
                 TicTacToeGame[1, 0] == player1 && TicTacToeGame[1, 1] == player1 && TicTacToeGame[1, 2] == player1 ||
                 TicTacToeGame[2, 0] == player1 && TicTacToeGame[2, 1] == player1 && TicTacToeGame[2, 2] == player1 ||
-                
+
                 // verticals
                 TicTacToeGame[0, 0] == player1 && TicTacToeGame[1, 0] == player1 && TicTacToeGame[2, 0] == player1 ||
                 TicTacToeGame[0, 1] == player1 && TicTacToeGame[1, 1] == player1 && TicTacToeGame[2, 1] == player1 ||
                 TicTacToeGame[0, 2] == player1 && TicTacToeGame[1, 2] == player1 && TicTacToeGame[2, 2] == player1 ||
 
-                 // diagonals
+                // diagonals
                 TicTacToeGame[0, 0] == player1 && TicTacToeGame[1, 1] == player1 && TicTacToeGame[2, 2] == player1 ||
                 TicTacToeGame[0, 2] == player1 && TicTacToeGame[1, 1] == player1 && TicTacToeGame[2, 0] == player1
         )

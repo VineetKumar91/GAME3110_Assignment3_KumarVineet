@@ -213,6 +213,7 @@ public static class ClientToServerSignifiers
     public const int SpectatorAnnounceWinner = 104;
 
     public const int ReplayListRequest = 60;
+    public const int ReplayListSave = 61;
 }
 
 public static class ServerToClientSignifiers
@@ -249,4 +250,5 @@ public static class ServerToClientSignifiers
     public const int SpectatorAnnounceWinner = 104;
     
     public const int ReplayListSend = 60;
+    public const int ReplayListLoad = 61;
 }

@@ -8,9 +8,6 @@ using System.Linq;
 using UnityEngine.UI;
 using System;
 
-// TODO!!! THE FOR EACH TO RETURN THE CURRENT CLIENT CAN BE PUT IN 1 FUNCTION -> 50+ lines of redundant code gone!
-// TODO!!! YOU ARE ALREADY HAVING THE REPLAY SYSTEM IN YOUR SERVER STUPID, YOU HAD ALREADY IMPLEMENTED IT.. WHY DIDN'T YOU USE IT
-
 public class NetworkedServer : MonoBehaviour
 {
     int maxConnections = 1000;
@@ -39,8 +36,12 @@ public class NetworkedServer : MonoBehaviour
     public List<PlayerAccount> GameRoomPlayerList;
     public List<PlayerAccount> GameRoomSpectatorList;
 
-    // Server side replay
+    
     public List<MovesOrderClass> MovesOrderList;
+
+    // Server side replay
+    public Queue<MovesOrderClass> ReplaySystemMovesRecorder;
+    public string replaySavePath = "";
 
     // Start is called before the first frame update
     void Start()
@@ -80,6 +81,12 @@ public class NetworkedServer : MonoBehaviour
 
         // Server side replay
         MovesOrderList = new List<MovesOrderClass>();
+
+        // Recorder in Queue
+        ReplaySystemMovesRecorder = new Queue<MovesOrderClass>();
+        replaySavePath = Application.dataPath + Path.DirectorySeparatorChar;
+
+
     }
 
     // Update is called once per frame
@@ -223,6 +230,9 @@ public class NetworkedServer : MonoBehaviour
                 LobbySendPersonalMessage(receivedMessageSplit, id);
                 break;
 
+            case ClientToServerSignifiers.ReplayListSave:
+                ReplayListSave(receivedMessageSplit, id);
+                break;
 
             case ClientToServerSignifiers.ReplayListRequest:
                 ReplayRoomSendReplayList(receivedMessageSplit, id);
@@ -701,7 +711,11 @@ public class NetworkedServer : MonoBehaviour
         // Store moves in server too now
         MovesOrderClass move = new MovesOrderClass(positionPlayed,1);
         MovesOrderList.Add(move);
-        
+
+        // Replay system
+        ReplaySystemMovesRecorder.Enqueue(move);
+
+
         string message = "";
 
         message = receivedMessageSplit[1] + "," + receivedMessageSplit[2] + ",";
@@ -741,6 +755,9 @@ public class NetworkedServer : MonoBehaviour
         // Store moves in server too now
         MovesOrderClass move = new MovesOrderClass(positionPlayed, 2);
         MovesOrderList.Add(move);
+
+        // Replay system
+        ReplaySystemMovesRecorder.Enqueue(move);
 
         string message = "";
 
@@ -859,6 +876,40 @@ public class NetworkedServer : MonoBehaviour
                 SendMessageToClient(ServerToClientSignifiers.LobbyReceiveGlobalMessage + "," + message, playerAccount.clientID);
             }
         }
+    }
+
+
+
+    /// <summary>
+    /// A replay list to save
+    /// </summary>
+    /// <param name="receivedMessageSplit"></param>
+    /// <param name="id"></param>
+    private void ReplayListSave(string[] receivedMessageSplit, int id)
+    {
+        string player1 = receivedMessageSplit[1];
+        string vs = receivedMessageSplit[2];
+        string player2 = receivedMessageSplit[3];
+        string savingPlayer = receivedMessageSplit[4];
+
+        string filename = savingPlayer + "-Match-" + player1 + "-" + vs +  "-" + player2 + ".txt";
+        string filePath = replaySavePath + "/" + filename;
+        // Streamwriter - write to file
+
+        File.WriteAllText(filePath,"");
+        StreamWriter streamWriter = new StreamWriter(filePath, false);
+
+        foreach (var replayMove in ReplaySystemMovesRecorder)
+        {
+            streamWriter.WriteLine(replayMove.moveLocation.x + "," + replayMove.moveLocation.y + ",");
+        }
+
+        // Flush for clearing the streamwriter
+        streamWriter.Flush();
+
+        // Close the stream writer
+        streamWriter.Close();
+
     }
 
 
@@ -1029,6 +1080,7 @@ public static class ClientToServerSignifiers
     public const int SpectatorAnnounceWinner = 104;
 
     public const int ReplayListRequest = 60;
+    public const int ReplayListSave = 61;
 }
 
 /// <summary>
@@ -1068,4 +1120,5 @@ public static class ServerToClientSignifiers
     public const int SpectatorAnnounceWinner = 104;
     
     public const int ReplayListSend = 60;
+    public const int ReplayListLoad = 61;
 }
