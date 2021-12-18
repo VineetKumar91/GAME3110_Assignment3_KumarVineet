@@ -25,6 +25,13 @@ public class ReplayListRoom : MonoBehaviour
     [SerializeField]
     private GameObject buttonPrefab;
 
+    [SerializeField] 
+    private Text player1Name;
+    [SerializeField] 
+    private Text player2Name;
+
+    private string nameOfReplay = "";
+
     // Replay Room instance
     private static ReplayListRoom _instance;
     
@@ -106,8 +113,10 @@ public class ReplayListRoom : MonoBehaviour
         Debug.Log(dropdown.options[menuIndex].text);
 
         string message = "";
-
+        
         message = ClientToServerSignifiers.ReplayRequest + "," + dropdown.options[menuIndex].text;
+
+        nameOfReplay = dropdown.options[menuIndex].text;
 
         if (networkedClient.IsConnected())
         {
@@ -129,6 +138,8 @@ public class ReplayListRoom : MonoBehaviour
     public void BackButtonPress()
     {
         GameManager.GetInstance().ChangeMode(CurrentMode.Lobby);
+        isReplayOn = false;
+        ClearButtons();
     }
 
 
@@ -181,6 +192,10 @@ public class ReplayListRoom : MonoBehaviour
     /// </summary>
     public void Button_ActivateReplay()
     {
+        string[] playerNames = nameOfReplay.Split('-');
+        player1Name.text = playerNames[2] + ":" + " X";
+        player2Name.text = playerNames[4] + ":" + " O";
+
         if (!isReplayOn)
         {
             isReplayOn = true;

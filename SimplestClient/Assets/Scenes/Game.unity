@@ -4892,6 +4892,8 @@ MonoBehaviour:
   AllButtons: []
   TicTacToeObject: {fileID: 507560237}
   buttonPrefab: {fileID: 2731519382090219631, guid: 049c307000d403244b1651d5c8d0055d, type: 3}
+  player1Name: {fileID: 1415083236}
+  player2Name: {fileID: 394784197}
   replaySystemRef: {fileID: 1908701023}
 --- !u!1 &931133880
 GameObject:
